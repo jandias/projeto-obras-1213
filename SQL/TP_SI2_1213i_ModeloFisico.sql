@@ -17,7 +17,7 @@ DROP TABLE Departamento
 DROP TABLE Oficina
 DROP TABLE Funcionario
 DROP TABLE Profissao
-DROP TABLE HistoricoObras
+DROP TABLE HistoricoAnualObras
 DROP TABLE HistoricoPecas
 
 DROP TYPE NOME_CLIENTE
@@ -202,7 +202,7 @@ CREATE TABLE LinhaFactura(
 	PRIMARY KEY(nLinha, factura)
 )
 
-CREATE TABLE HistoricoObras (
-	codHist INT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE HistoricoAnualObras (
+	anoHist INT PRIMARY KEY,
 	conteudo XML
 )
