@@ -1,0 +1,16 @@
+﻿@using obras_1213.Models
+@model IEnumerable<Employee>
+
+@{
+    ViewBag.Title = "Funcionários";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Funcionários</h2>
+
+<div class="well"><table>
+<tr><th>Número</th><th>Nome</th><th>NIF</th><th>E-mail</th><th>Profissão</th><th>Estado</th></tr>
+@foreach(Employee e in Model) {
+    <tr><td>@e.ID</td><td>@e.Name</td><td>@e.NIF</td><td>@e.Email</td><td>@e.Profession</td><td>@e.State</td></tr>
+}
+</table></div>

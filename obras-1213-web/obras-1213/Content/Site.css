@@ -12,6 +12,18 @@ section {
     display: block;
 }
 
+table {
+    width: 100%;
+}
+th {
+    padding: 0.2em;
+    font-weight: bold;
+    text-align: left;
+}
+td {
+    padding: 0.2em;
+}
+
 /* Styles for basic forms
 -----------------------------------------------------------*/
 
