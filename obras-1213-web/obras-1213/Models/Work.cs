@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
@@ -16,8 +17,14 @@ namespace obras_1213.Models
         public float PredictedTime { get; set; }
         public string CarLicense { get; set; }
 
-        public Work()
+        public Work(int shop, string car)
         {
+            ShopID = shop;
+            CarLicense = car;
+            IssuanceDate = DateTime.Now;
+            State = "marcada";
+            PredictedValue = 0;
+            PredictedTime = 0;
         }
 
         public Work(int id, int shop, DateTime date, string state, decimal value, float time, string car)

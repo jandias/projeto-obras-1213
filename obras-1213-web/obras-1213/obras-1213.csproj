@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auth\EmployeeAuthentication.cs" />
+    <Compile Include="Auth\EmployeeRoles.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CarsController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />

@@ -7,18 +7,17 @@ using System.Web.Mvc;
 
 namespace obras_1213.Controllers
 {
-    [Authorize]
     public class ObrasController : Controller
     {
         //
         // GET: /Obras/
-
+        [HttpGet, Authorize]
         public ActionResult Index()
         {
             return View(Work.FindAll());
         }
 
-        [HttpGet]
+        [HttpGet, Authorize]
         public ActionResult Details(int id)
         {
             try
@@ -30,6 +29,12 @@ namespace obras_1213.Controllers
                 ModelState.AddModelError("", ex);
                 return View("Index");
             }
+        }
+
+        [HttpPost, Authorize(Roles = "receptionist")]
+        public ActionResult Index(string carLicense)
+        {
+            return View();
         }
     }
 }
