@@ -7,15 +7,14 @@ using System.Web.Mvc;
 
 namespace obras_1213.Controllers
 {
-    [Authorize]
-    public class EmployeeController : Controller
+    public class CarsController : Controller
     {
         //
-        // GET: /Employee/
+        // GET: /Cars/
 
         public ActionResult Index()
         {
-            return View(Employee.AllEmployees());
+            return View(Car.FindAll());
         }
 
     }

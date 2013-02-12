@@ -1,6 +1,22 @@
-﻿@{
+﻿@using obras_1213.Models
+@model IEnumerable<Work>
+
+@{
     ViewBag.Title = "Obras";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>Obras</h2>
+
+@Html.ValidationSummary(false)
+
+<div class="well"><table>
+<tr><th>Número</th><th>Data de inserção</th><th>Estado</th><th>Valor estimado</th><th>Duração estimada</th><th>Viatura</th></tr>
+@foreach(Work w in Model) {
+    <tr><td>@Html.ActionLink(w.ID.ToString(), "Details", "Obras", new { id = w.ID }, null)</td>
+        <td>@w.IssuanceDate</td><td>@w.State</td><td>@w.PredictedValue €</td><td>@w.PredictedTime</td><td>@w.CarLicense</td></tr>
+}
+@if (Model.Count() == 0) {
+    <tr><td colspan="6"><i>Não existem obras registadas no sistema.</i></td></tr>
+}
+</table></div>

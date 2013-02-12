@@ -23,7 +23,7 @@ namespace obras_1213.Controllers
             {
                 FormsAuthentication.SetAuthCookie(employeeNumber, false);
                 this.Employee = Employee.Find(Int32.Parse(employeeNumber));
-                return Redirect(String.IsNullOrEmpty(ReturnUrl) ? Url.RouteUrl("Default") : ReturnUrl);
+                return Redirect(String.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl);
             }
             else
             {

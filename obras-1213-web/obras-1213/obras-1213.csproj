@@ -97,15 +97,20 @@
   <ItemGroup>
     <Compile Include="Auth\EmployeeAuthentication.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\CarsController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\ObrasController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Action.cs" />
+    <Compile Include="Models\Car.cs" />
     <Compile Include="Models\Db\Utils.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\ModelException.cs" />
+    <Compile Include="Models\Work.cs" />
+    <Compile Include="Models\WorkAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +217,8 @@
     <Content Include="Views\Login\Index.cshtml" />
     <Content Include="Views\Obras\Index.cshtml" />
     <Content Include="Views\Employee\Index.cshtml" />
+    <Content Include="Views\Obras\Details.cshtml" />
+    <Content Include="Views\Cars\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

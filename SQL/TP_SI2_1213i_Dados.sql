@@ -8,6 +8,8 @@ DELETE FROM Departamento
 DELETE FROM Oficina
 DELETE FROM Funcionario
 DELETE FROM Profissao
+DELETE FROM Obra
+DELETE FROM Veiculo
 
 SET IDENTITY_INSERT Profissao ON
 INSERT INTO Profissao (idProf, designacaoProf)
@@ -66,3 +68,13 @@ VALUES
 	(5, 4, 1, 'Substituição óleo', 0.5),
 	(6, 5, 1, 'Substituição pára-choques', 1.5)
 SET IDENTITY_INSERT Acto OFF
+
+INSERT INTO Veiculo (matricula, marca, modelo, nomeProprietario)
+VALUES 
+	('11-22-AA', 'Toyota', 'iQ', 'Manuel Maria')
+
+SET IDENTITY_INSERT Obra ON
+INSERT INTO Obra (codO, oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo)
+VALUES 
+	(1, 1, GETDATE(), 'marcada', 0, 0, '11-22-AA')
+SET IDENTITY_INSERT Obra OFF
