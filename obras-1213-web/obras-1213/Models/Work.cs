@@ -72,6 +72,31 @@ namespace obras_1213.Models
             }
         }
 
+        public IEnumerable<WorkPart> Parts
+        {
+            get
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(
+                        "select p.refP, p.designacaoP, p.precoP, r.quantP from Reserva r " +
+                        " join Peca p on r.peca=p.refP " +
+                        " where r.obra=@id ", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", ID);
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                yield return new WorkPart(dr.GetString(0), dr.GetString(1), dr.GetDecimal(2), dr.GetInt32(3));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public static Work Find(int id)
         {
             try

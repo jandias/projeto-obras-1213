@@ -109,8 +109,10 @@
     <Compile Include="Models\Db\Utils.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\ModelException.cs" />
+    <Compile Include="Models\Part.cs" />
     <Compile Include="Models\Work.cs" />
     <Compile Include="Models\WorkAction.cs" />
+    <Compile Include="Models\WorkPart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
