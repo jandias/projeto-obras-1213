@@ -1,9 +1,11 @@
-USE TP_SI2_1213i
+USE Obras
 
 DROP VIEW ListaPecas
 DROP VIEW ObrasNaoTerminadas
 
 DROP FUNCTION EscolheFuncionario
+
+DROP PROCEDURE FuncionarioRecepcionista
 
 DROP PROCEDURE RemoveCliente
 DROP PROCEDURE AlteraCliente
@@ -454,5 +456,16 @@ AS BEGIN
 			END
 		END
 	COMMIT
+END
+GO
+
+CREATE PROCEDURE FuncionarioRecepcionista(@funcionario INT, @recepcionista INT OUTPUT)
+AS BEGIN
+	IF (EXISTS (SELECT fd.departamento FROM FuncionarioDepartamento fd
+			JOIN Departamento d ON fd.departamento=d.codDep
+			WHERE nomeDep='Recepção' AND fd.funcionario=@funcionario))
+		SET @recepcionista=1
+	ELSE
+		SET @recepcionista=0
 END
 GO

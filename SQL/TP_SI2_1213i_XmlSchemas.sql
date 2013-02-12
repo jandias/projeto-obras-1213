@@ -1,4 +1,4 @@
-USE TP_SI2_1213i
+USE Obras
 
 DROP XML SCHEMA COLLECTION ActosObraSchemaCollection
 
