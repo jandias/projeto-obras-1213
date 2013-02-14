@@ -1,0 +1,33 @@
+﻿@using obras_1213.Models.View
+@model NewWorkViewModel
+@{
+    ViewBag.Title = "Nova Obra";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Nova Obra</h2>
+
+@Html.ValidationSummary(true, "Não foi possível inserir a obra.")
+
+@using (Html.BeginForm("New", "Obras", FormMethod.Post, new { Class = "form-horizontal" }))
+{
+    <div class="control-group">
+        <label for="CarLicensePlate" class= "control-label">Viatura</label>
+        <div class="controls">
+            @Html.DropDownListFor(m => m.CarLicensePlate, Model.CarsForSelect)
+            @Html.ValidationMessageFor(m => m.CarLicensePlate)
+        </div>
+    </div>
+    <div class="control-group">
+        <label for="Actions" class= "control-label">Actos a executar</label>
+        <div class="controls">
+            @Html.ListBoxFor(m => m.Actions, Model.ActionsForSelect)
+            @Html.ValidationMessageFor(m => m.Actions)
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <input type="submit" value="Criar" class="btn btn-success" />
+        </div>
+    </div>
+}

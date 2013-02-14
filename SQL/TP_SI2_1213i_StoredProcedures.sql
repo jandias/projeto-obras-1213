@@ -6,6 +6,8 @@ DROP VIEW ObrasNaoTerminadas
 DROP FUNCTION EscolheFuncionario
 
 DROP PROCEDURE FuncionarioRecepcionista
+DROP PROCEDURE RetiraPecaObra
+DROP PROCEDURE AdicionaPecaObra
 
 DROP PROCEDURE RemoveCliente
 DROP PROCEDURE AlteraCliente
@@ -25,6 +27,44 @@ DROP TRIGGER ValidaFuncionarioObra
 DROP TRIGGER ValidaClienteObra 
 DROP TRIGGER ImpedeRemocaoFuncionario 
 DROP TRIGGER ImpedeRemocaoObra 
+GO
+
+
+CREATE PROCEDURE AdicionaPecaObra(@peca REF_PECA, @quantidade INT, @obra INT, @oficina INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		INSERT INTO Reserva (peca, oficina, obra, quantP) VALUES (@peca, @oficina, @obra, @quantidade)
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+		UPDATE Obra SET valorEstimado = valorEstimado + @quantidade * (SELECT precoP FROM Peca WHERE refP = @peca)
+			WHERE oficina = @oficina AND codO = @obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+	COMMIT
+END
+GO
+
+CREATE PROCEDURE RetiraPecaObra(@peca REF_PECA, @obra INT, @oficina INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		UPDATE Obra SET valorEstimado = 
+			valorEstimado - (SELECT quantP FROM Reserva WHERE peca = @peca AND oficina = @oficina AND obra = @obra) * (SELECT precoP FROM Peca WHERE refP = @peca)
+			WHERE oficina = @oficina AND codO = @obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+		DELETE FROM Reserva WHERE peca=@peca AND oficina=@oficina AND obra=@obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+	COMMIT
+END
 GO
 
 /* b. Realizar a consulta da lista de Peças e respectivos preços, apresentando, para cada peça, o número de obras em
@@ -234,13 +274,12 @@ AS BEGIN
 END
 GO
 
-CREATE PROCEDURE RegistarObra(@veiculo MATRICULA, @oficina INT, @actosDoc XML (ActosObraSchemaCollection) ) 
+CREATE PROCEDURE RegistarObra(@veiculo MATRICULA, @oficina INT, @actosDoc XML (ActosObraSchemaCollection), @idObra INT OUTPUT ) 
 AS BEGIN
 	IF (@veiculo = '' OR @veiculo IS NULL OR @oficina IS NULL)
 		RETURN -1
 		
 	DECLARE @actos TABLE (id INT, departamento INT, horas REAL)
-	DECLARE @idObra INT
 	DECLARE @horasEstimadas REAL
 	DECLARE @curActoId INT, @curDepId INT, @curHoras REAL, @curFunc INT
 	
@@ -265,7 +304,7 @@ AS BEGIN
 		SET @idObra = SCOPE_IDENTITY()
 		
 		SET @horasEstimadas = 0
-		DECLARE actosCur CURSOR FOR SELECT id, departamento FROM @actos
+		DECLARE actosCur CURSOR FOR SELECT id, departamento, horas FROM @actos
 		OPEN actosCur
 		FETCH NEXT FROM actosCur INTO @curActoId, @curDepId, @curHoras
 		WHILE (@@FETCH_STATUS = 0) BEGIN

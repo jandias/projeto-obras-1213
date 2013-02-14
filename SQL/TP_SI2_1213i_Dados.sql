@@ -1,15 +1,23 @@
 USE Obras
 
+DELETE FROM Peca
 DELETE FROM Habilitado
 DELETE FROM Acto
 DELETE FROM FuncionarioDepartamento
 DELETE FROM ProfissaoDepartamento
 DELETE FROM Departamento
-DELETE FROM Oficina
 DELETE FROM Funcionario
 DELETE FROM Profissao
 DELETE FROM Obra
 DELETE FROM Veiculo
+DELETE FROM Oficina
+GO
+
+INSERT INTO Peca (refP, designacaoP, precoP)
+VALUES
+	('LPBR', 'Limpa pára-brisas', 5),
+	('VELA', 'Velas de ignição', 15),
+	('O5W3', 'Óleo 5W30', 20)
 
 SET IDENTITY_INSERT Profissao ON
 INSERT INTO Profissao (idProf, designacaoProf)
@@ -57,7 +65,11 @@ INSERT INTO ProfissaoDepartamento (departamento, oficina, profissao)
 VALUES
 	(1, 1, 1), (2, 1, 2), (3, 1, 2), (4, 1, 3), (5, 1, 4), (5, 1, 5), (6, 1, 6),
 	(7, 1, 7), (7, 1, 8), (8, 1, 9), (9, 1, 10)
-	
+
+INSERT INTO FuncionarioDepartamento (departamento, funcionario, oficina)
+VALUES
+	(1, 1, 1)
+
 SET IDENTITY_INSERT Acto ON
 INSERT INTO Acto (idA, departamento, oficina, designacaoA, horasEstimadas)
 VALUES

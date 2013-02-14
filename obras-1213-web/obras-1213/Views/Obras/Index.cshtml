@@ -6,17 +6,27 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Obras</h2>
+<div class="row">
+    <div class="span6">
+        <h2 class="nomargin">Obras</h2>
+    </div>
+    <div class="span6 text-right">
+        <a href="@Url.Action("New")" class="btn btn-success">
+            <i class="icon-plus-sign"></i> Inserir uma obra nova
+        </a>
+    </div>
+</div>
 
 @Html.ValidationSummary(false)
+<br />
 
-<div class="well"><table>
+<table class="table table-striped">
 <tr><th>Número</th><th>Data de inserção</th><th>Estado</th><th>Valor estimado</th><th>Duração estimada</th><th>Viatura</th></tr>
 @foreach(Work w in Model) {
-    <tr><td>@Html.ActionLink(w.ID.ToString(), "Details", "Obras", new { id = w.ID }, null)</td>
+    <tr><td><a href="@Url.Action("Details", "Obras", new { id = w.ID })">@w.ID <i class="icon-circle-arrow-right"></i></a></td>
         <td>@w.IssuanceDate</td><td>@w.State</td><td>@w.PredictedValue €</td><td>@w.PredictedTime</td><td>@w.CarLicense</td></tr>
 }
 @if (Model.Count() == 0) {
     <tr><td colspan="6"><i>Não existem obras registadas no sistema.</i></td></tr>
 }
-</table></div>
+</table>

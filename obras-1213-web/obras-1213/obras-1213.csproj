@@ -111,6 +111,8 @@
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\ModelException.cs" />
     <Compile Include="Models\Part.cs" />
+    <Compile Include="Models\View\NewWorkViewModel.cs" />
+    <Compile Include="Models\View\WorkViewModel.cs" />
     <Compile Include="Models\Work.cs" />
     <Compile Include="Models\WorkAction.cs" />
     <Compile Include="Models\WorkPart.cs" />
@@ -222,6 +224,7 @@
     <Content Include="Views\Employee\Index.cshtml" />
     <Content Include="Views\Obras\Details.cshtml" />
     <Content Include="Views\Cars\Index.cshtml" />
+    <Content Include="Views\Obras\New.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
+using System.Xml.Serialization;
 
 namespace obras_1213.Models
 {
@@ -104,6 +107,59 @@ namespace obras_1213.Models
             }
         }
 
+        public bool AddPart(WorkPart part)
+        {
+            try
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("AdicionaPecaObra", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                        retVal.Direction = ParameterDirection.ReturnValue;
+                        cmd.Parameters.AddWithValue("@peca", part.ID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@quantidade", part.Quantity).Direction = ParameterDirection.Input;
+                        cmd.ExecuteNonQuery();
+                        return (int)retVal.Value == 0;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+            }
+        }
+
+        public bool RemovePart(string part)
+        {
+            try
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("RetiraPecaObra", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                        retVal.Direction = ParameterDirection.ReturnValue;
+                        cmd.Parameters.AddWithValue("@peca", part).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
+                        cmd.ExecuteNonQuery();
+                        return (int)retVal.Value == 0;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+            }
+        }
+
         public static Work Find(int id)
         {
             try
@@ -153,6 +209,73 @@ namespace obras_1213.Models
                     }
                 }
             }
+        }
+
+        [XmlRoot(ElementName="actos")]
+        public class Actos
+        {
+            public class InfoActo
+            {
+                public int id { get; set; }
+                public int departamento { get; set; }
+            }
+
+            [XmlElement("acto")]
+            public InfoActo[] acto { get; set; }
+
+            public Actos()
+            {
+            }
+
+            public Actos(string[] actions)
+            {
+                acto = new InfoActo[actions.Length];
+                for (int i = 0; i < actions.Length; ++i)
+                {
+                    Action a = Action.Deserialize(actions[i]);
+                    acto[i] = new InfoActo() { departamento = a.DepartmentID, id = a.ID };
+                }
+            }
+        }
+
+        public static int Insert(int shopId, string carLicense, string[] actions)
+        {
+            int newWork = 0;
+            try
+            {
+                XmlSerializer ser = new XmlSerializer(typeof(Actos));
+                StringWriter sw = new StringWriter();
+                ser.Serialize(sw, new Actos(actions));
+                string axml = sw.ToString();
+                sw.Close();
+                axml = sw.ToString();
+
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("RegistarObra", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                        retVal.Direction = ParameterDirection.ReturnValue;
+                        cmd.Parameters.AddWithValue("@veiculo", carLicense).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@oficina", shopId).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@actosDoc", axml).Direction = ParameterDirection.Input;
+                        SqlParameter idObra = cmd.Parameters.Add("@idObra", SqlDbType.Int);
+                        idObra.Direction = ParameterDirection.Output;
+                        cmd.ExecuteNonQuery();
+                        if ((int)retVal.Value == 0)
+                        {
+                            newWork = (int)idObra.Value;
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+            }
+            return newWork;
         }
     }
 }

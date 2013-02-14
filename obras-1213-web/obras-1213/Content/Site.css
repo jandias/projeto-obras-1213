@@ -24,6 +24,22 @@ td {
     padding: 0.2em;
 }
 
+.greyish {
+    background-color: lightgray;
+}
+
+.underlined {
+    border-bottom: solid 1px gray;
+}
+
+.nopadding {
+    padding: 0px;
+}
+
+.nomargin {
+    margin: 0px;
+}
+
 /* Styles for basic forms
 -----------------------------------------------------------*/
 

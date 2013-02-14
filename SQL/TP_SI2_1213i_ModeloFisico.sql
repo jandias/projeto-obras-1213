@@ -62,7 +62,7 @@ CREATE TABLE Oficina(
 	moradaOfic VARCHAR(300) NOT NULL,
 	telefoneOfic INT NOT NULL,
 	faxOfic INT,
-	responsavel INT REFERENCES Funcionario (codFunc)
+	responsavel INT REFERENCES Funcionario (codFunc) ON DELETE SET NULL
 )
 
 CREATE TABLE Departamento(

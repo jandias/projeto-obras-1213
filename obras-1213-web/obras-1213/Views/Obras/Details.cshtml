@@ -1,5 +1,6 @@
 ﻿@using obras_1213.Models
-@model Work
+@using obras_1213.Models.View
+@model WorkViewModel
 
 @{
     ViewBag.Title = "Detalhes de obra";
@@ -8,4 +9,89 @@
 
 <h2>Detalhes de obra</h2>
 
-@Html.DisplayForModel()
+@Html.ValidationSummary(false, "Não foi possível alterar a obra.")
+
+<div class="container">
+    <div class="row">
+        <div class="span6">
+            <dl class="dl-horizontal">
+                <dt>Viatura</dt><dd>@Model.Work.CarLicense</dd>
+                <dt>Duração estimada</dt><dd>@Model.Work.PredictedTime horas</dd>
+                <dt>Valor previsto</dt><dd>@Model.Work.PredictedValue &euro;</dd>
+            </dl>                
+        </div>
+        <div class="span6 text-right">
+        @using (Html.BeginForm("Change", "Obras", FormMethod.Post, new { Class = "form-inline" }))
+        {
+            <b>Estado:</b> @Html.DropDownListFor(m => m.Work.State, new SelectListItem[] { 
+                    new SelectListItem { Value = "marcada", Text = "Marcada" },
+                    new SelectListItem { Value = "em realização", Text = "Em realização" },
+                    new SelectListItem { Value = "espera peças", Text = "Aguarda peças" },
+                    new SelectListItem { Value = "concluída", Text = "Concluída" },
+                    new SelectListItem { Value = "facturada", Text = "Facturada" },
+                    new SelectListItem { Value = "paga", Text = "Paga" }
+                })
+            <button class="btn btn-warning btn" type="submit"><i class="icon-ok-sign"></i>Alterar</button>
+            @Html.HiddenFor(m => m.Work.ID)
+            @Html.HiddenFor(m => m.Work.ShopID)
+        }
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6">
+            <h4>Actos</h4>
+            <table class="table">
+                <tr><th>Descrição</th><th>Funcionário</th><th>Horas</th><th>Estado</th><th></th></tr>
+                @foreach (WorkAction a in Model.Work.Actions)
+                {
+                    <tr><td>@a.Description</td><td>@a.Employee.Name</td><td>@a.TimeWorked</td>
+                        <td>
+                            @if (a.Completed)
+                            {
+                                <p class="text-success">Completada</p>
+                            }
+                            else
+                            {
+                                <form action="@Url.Action("CompleteAction", "Obras", new { id = Model.Work.ID })" class="inline-form nopadding nomargin" method="post">
+                                    <input type="hidden" name="actionId" value="@a.ID" />
+                                    <button class="btn btn-success"><i class="icon-ok"></i>Completar</button>
+                                </form>
+                            }
+                        </td>
+                        <td>
+                            <form action="@Url.Action("RemoveAction", "Obras", new { id = Model.Work.ID })" class="inline-form nopadding nomargin" method="post">
+                                <input type="hidden" name="actionId" value="@a.ID" />
+                                <button class="btn btn-danger"><i class="icon-remove"></i>Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="span6">
+            <h4>Peças</h4>
+            <table class="table">
+            <tr><th>Descrição</th><th>Preço</th><th>Quantidade</th><th></th></tr>
+            @foreach (WorkPart p in Model.Work.Parts)
+            {
+                <tr><td>@p.Description</td><td>@p.Price &euro;</td><td>@p.Quantity</td>
+                    <td>
+                        <form action="@Url.Action("RemovePart", "Obras", new { id = Model.Work.ID })" 
+                            class="inline-form nopadding nomargin" method="post">
+                            <input type="hidden" name="partId" value="@p.ID" />
+                            <button class="btn btn-danger"><i class="icon-remove"></i>Remover</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            <tr>
+            <form action="@Url.Action("AddPart", "Obras", new { id = Model.Work.ID })" class="inline-form" method="post">
+                <td colspan="2">@Html.DropDownList("newPart.ID", Model.PartsToSelect)</td>
+                <td><input name="newPart.Quantity" type="number" min="1" max="99" style="width:3em;"/></td>
+                <td><button class="btn btn-success btn" type="submit"><i class="icon-plus-sign"></i>Adicionar</button></td>
+            </form>
+            </tr>
+            </table>
+        </div>
+    </div>
+</div>
