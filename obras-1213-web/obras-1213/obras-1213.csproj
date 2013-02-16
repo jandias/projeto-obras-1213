@@ -99,6 +99,7 @@
     <Compile Include="Auth\EmployeeRoles.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CarsController.cs" />
+    <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\ObrasController.cs" />
@@ -107,8 +108,11 @@
     </Compile>
     <Compile Include="Models\Action.cs" />
     <Compile Include="Models\Car.cs" />
+    <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\Db\Utils.cs" />
     <Compile Include="Models\Employee.cs" />
+    <Compile Include="Models\Invoice.cs" />
+    <Compile Include="Models\InvoiceLine.cs" />
     <Compile Include="Models\ModelException.cs" />
     <Compile Include="Models\Part.cs" />
     <Compile Include="Models\View\NewWorkViewModel.cs" />
@@ -225,6 +229,7 @@
     <Content Include="Views\Obras\Details.cshtml" />
     <Content Include="Views\Cars\Index.cshtml" />
     <Content Include="Views\Obras\New.cshtml" />
+    <Content Include="Views\Customer\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

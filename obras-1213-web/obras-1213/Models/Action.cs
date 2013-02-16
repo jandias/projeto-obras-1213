@@ -96,7 +96,7 @@ namespace obras_1213.Models
                 {
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {
-                        if (dr.Read())
+                        while (dr.Read())
                         {
                             yield return new Action(dr.GetInt32(4), dr.GetInt32(0), dr.GetInt32(1), dr.GetString(2),
                                 dr.GetFloat(3));

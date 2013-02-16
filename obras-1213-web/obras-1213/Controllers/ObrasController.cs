@@ -55,10 +55,113 @@ namespace obras_1213.Controllers
             return View(newWork);
         }
 
-        [HttpPost, Authorize(Roles = "receptionist")]
-        public ActionResult Change(Work workData)
+        [Authorize(Roles = "receptionist")]
+        public ActionResult ChangeState(int id, string state)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Work.Find(id).State = state;
+                    return RedirectToAction("Details", new { id = id });
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
+        }
+
+        [HttpPost, Authorize(Roles = "receptionist")]
+        public ActionResult AddAction(int id, int actionId, int employeeId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (Work.Find(id).AddAction(actionId, employeeId))
+                    {
+                        return RedirectToAction("Details", new { id = id });
+                    }
+                    ModelState.AddModelError("", "Não foi possível adicionar o acto à obra.");
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
+        }
+
+        [Authorize(Roles = "receptionist")]
+        public ActionResult RemoveAction(int id, int actionId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (Work.Find(id).Actions.First(a => a.ID == actionId).Remove())
+                    {
+                        return RedirectToAction("Details", new { id = id });
+                    }
+                    ModelState.AddModelError("", "Não foi possível adicionar o acto à obra.");
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
+        }
+
+        [Authorize]
+        public ActionResult CompleteAction(int id, int actionId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    WorkAction wa = Work.Find(id).Actions.First(a => a.ID == actionId);
+                    if (wa.CurrentUserCanComplete)
+                    {
+                        wa.Completed = true;
+                        return RedirectToAction("Details", new { id = id });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Não tem autorização para completar este acto.");
+                    }
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
+        }
+
+        [HttpPost, Authorize]
+        public ActionResult ChangeActionTime(int id, int actionId, string time)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    float actualTime;
+                    if (time != null && float.TryParse(time, out actualTime))
+                    {
+                        Work.Find(id).Actions.First(a => a.ID == actionId).TimeWorked = actualTime;
+                        return RedirectToAction("Details", new { id = id });
+                    }
+                    ModelState.AddModelError("", "O número de horas não está num formato correcto.");
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
         }
 
         [HttpPost, Authorize(Roles = "receptionist")]
@@ -68,7 +171,7 @@ namespace obras_1213.Controllers
             {
                 try
                 {
-                    if (Work.Find(id).RemovePart(partId))
+                    if (Work.Find(id).Parts.First(p => p.ID.Equals(partId)).Remove())
                     {
                         return RedirectToAction("Details", new { id = id });
                     }
@@ -98,6 +201,53 @@ namespace obras_1213.Controllers
                 catch (ModelException)
                 {
                     ModelState.AddModelError("", "Não é possível adicionar essa peça à obra. Será que já existe?");
+                }
+            }
+            return Details(id);
+        }
+
+        [HttpPost, Authorize(Roles = "receptionist")]
+        public ActionResult InvoiceTo(int id, int customerId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (Work.Find(id).Facturar(customerId))
+                    {
+                        return RedirectToAction("Details", new { id = id });
+                    }
+                    ModelState.AddModelError("", "Não é possível facturar esta obra?");
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return Details(id);
+        }
+
+        [Authorize(Roles = "receptionist")]
+        public ActionResult Pay(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Invoice inv = Work.Find(id).Invoice;
+                    if (inv != null)
+                    {
+                        inv.Paid = true;
+                        if (inv.Paid)
+                        {
+                            return RedirectToAction("Details", new { id = id });
+                        }
+                    }
+                    ModelState.AddModelError("", "Não é possível pagar esta obra?");
+                }
+                catch (ModelException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
                 }
             }
             return Details(id);

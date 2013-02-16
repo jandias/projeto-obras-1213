@@ -1,0 +1,73 @@
+﻿@using obras_1213.Models
+@model IEnumerable<Customer>
+@{
+    ViewBag.Title = "Clientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var newCustomer = new Customer();
+    var customerTypes = new SelectListItem[] {
+        new SelectListItem() { Value="particulares", Text="Particular" },
+        new SelectListItem() { Value="institucionais", Text="Institucional" },
+        new SelectListItem() { Value="companhias de seguros", Text="Companhia de seguros" },
+    };
+}
+
+<h2>Clientes</h2>
+
+@Html.ValidationSummary(true, "Não foi possível guardar os dados.")
+
+<table class="table">
+    <tr><th></th><th>NIF</th><th>Nome</th><th>Morada</th><th>Telefone</th><th>Email</th><th>Tipo</th></tr>
+    @foreach(Customer cust in Model)
+    {
+        var formId = "cr_" + cust.ID.ToString();
+        var jqFormId = "#" + formId;
+        <tr>
+            <td><i class="icon-edit" onclick="$('@jqFormId').toggle()"></i> @cust.ID</td>
+            <td>@cust.NIF</td>
+            <td>@cust.Nome</td>
+            <td>@cust.Morada</td>
+            <td>@cust.Telefone</td>
+            <td>@cust.Email</td>
+            <td>@cust.Tipo</td>
+        </tr>
+        <tr id="@formId" style="display:none"><td colspan="7">
+            <form action="@Url.Action("Update")" method="post" class="form-horizontal">
+                <div class="control-group">
+                @Html.HiddenFor(m => cust.ID)
+                <div class="control-label">@Html.LabelFor(m => cust.NIF, "NIF")</div><div class="controls">@Html.EditorFor(m => cust.NIF)</div>
+                </div><div class="control-group">
+                <div class="control-label">@Html.LabelFor(m => cust.Nome, "Nome")</div><div class="controls">@Html.EditorFor(m => cust.Nome)</div>
+                </div><div class="control-group">
+                <div class="control-label">@Html.LabelFor(m => cust.Morada, "Morada")</div><div class="controls">@Html.EditorFor(m => cust.Morada)</div>
+                </div><div class="control-group">
+                <div class="control-label">@Html.LabelFor(m => cust.Telefone, "Telefone")</div><div class="controls">@Html.EditorFor(m => cust.Telefone)</div>
+                </div><div class="control-group">
+                <div class="control-label">@Html.LabelFor(m => cust.Email, "Email")</div><div class="controls">@Html.EditorFor(m => cust.Email)</div>
+                </div><div class="control-group">
+                <div class="control-label">@Html.LabelFor(m => cust.Tipo, "Tipo")</div><div class="controls">@Html.DropDownListFor(m => cust.Tipo, customerTypes)</div>
+                </div><div class="control-group">
+                    <div class="controls"><button class="btn btn-success"><i class="icon-refresh"></i> Alterar os dados do cliente</button></div>
+                </div>
+            </form>
+        </td></tr>
+    }
+</table>
+<form action="@Url.Action("Index")" method="post" class="form-horizontal">
+    <fieldset>
+        <legend>Novo cliente</legend>
+        <div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.NIF, "NIF")</div><div class="controls">@Html.EditorFor(m => newCustomer.NIF) @Html.ValidationMessageFor(m => newCustomer.NIF)</div>
+        </div><div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.Nome, "Nome")</div><div class="controls">@Html.EditorFor(m => newCustomer.Nome) @Html.ValidationMessageFor(m => newCustomer.Nome)</div>
+        </div><div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.Morada, "Morada")</div><div class="controls">@Html.EditorFor(m => newCustomer.Morada) @Html.ValidationMessageFor(m => newCustomer.Morada)</div>
+        </div><div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.Telefone, "Telefone")</div><div class="controls">@Html.EditorFor(m => newCustomer.Telefone) @Html.ValidationMessageFor(m => newCustomer.Telefone)</div>
+        </div><div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.Email, "Email")</div><div class="controls">@Html.EditorFor(m => newCustomer.Email) @Html.ValidationMessageFor(m => newCustomer.Email)</div>
+        </div><div class="control-group">
+        <div class="control-label">@Html.LabelFor(m => newCustomer.Tipo, "Tipo")</div><div class="controls">@Html.DropDownListFor(m => newCustomer.Tipo, customerTypes) @Html.ValidationMessageFor(m => newCustomer.Tipo)</div>
+        </div><div class="control-group">
+        <div class="controls"><button class="btn btn-success"><i class="icon-plus-sign"></i> Adicionar</button></div>
+    </fieldset>
+</form>

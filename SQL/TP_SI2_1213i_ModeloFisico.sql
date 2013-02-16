@@ -128,7 +128,7 @@ CREATE TABLE Obra(
 	codO INT IDENTITY(1,1),
 	oficina INT REFERENCES Oficina (codOfic),
 	dataRegistoO DATE NOT NULL,
-	estadoO VARCHAR(12) NOT NULL CHECK (estadoO IN ('marcada', 'em realização', 'espera peças', 'concluída', 'facturada', 'paga')),
+	estadoO VARCHAR(13) NOT NULL CHECK (estadoO IN ('marcada', 'em realização', 'espera peças', 'concluída', 'facturada', 'paga')),
 	valorEstimado MONEY NOT NULL,
 	totalHorasEstimado REAL NOT NULL,
 	veiculo MATRICULA NOT NULL REFERENCES Veiculo (matricula),
@@ -193,11 +193,11 @@ CREATE TABLE Factura(
 )
 
 CREATE TABLE LinhaFactura(
-	nLinha INT IDENTITY(1,1),
+	nLinha INT,
 	factura INT NOT NULL REFERENCES Factura (numFact),
 	descricaoLinha VARCHAR(80) NOT NULL,
 	precoUnit MONEY NOT NULL,
-	quant INT NOT NULL,
+	quant REAL NOT NULL,
 	totalLinha MONEY NOT NULL,
 	PRIMARY KEY(nLinha, factura)
 )

@@ -15,17 +15,18 @@ namespace obras_1213.Models
         public int ID { get; set; }
         public int ShopID { get; set; }
         public DateTime IssuanceDate { get; set; }
-        public string State { get; set; }
         public decimal PredictedValue { get; set; }
         public float PredictedTime { get; set; }
         public string CarLicense { get; set; }
+
+        private string state;
 
         public Work(int shop, string car)
         {
             ShopID = shop;
             CarLicense = car;
             IssuanceDate = DateTime.Now;
-            State = "marcada";
+            state = "marcada";
             PredictedValue = 0;
             PredictedTime = 0;
         }
@@ -35,10 +36,100 @@ namespace obras_1213.Models
             ID = id;
             ShopID = shop;
             IssuanceDate = date;
-            State = state;
+            this.state = state;
             PredictedValue = value;
             PredictedTime = time;
             CarLicense = car;
+        }
+
+        public string State 
+        {
+            get
+            {
+                return state;
+            }
+            set
+            {
+                if (!state.Equals(value))
+                {
+                    try
+                    {
+                        using (SqlConnection conn = Db.Utils.NewConnection)
+                        {
+                            conn.Open();
+                            using (SqlCommand cmd = new SqlCommand(
+                                "UPDATE Obra SET estadoO = @estado WHERE codO=@obra AND oficina=@oficina",
+                                conn))
+                            {
+                                cmd.Parameters.AddWithValue("@estado", value);
+                                cmd.Parameters.AddWithValue("@obra", ID);
+                                cmd.Parameters.AddWithValue("@oficina", ShopID);
+                                if (cmd.ExecuteNonQuery() > 0)
+                                {
+                                    state = value;
+                                    if (state.Equals("facturada"))
+                                    {
+
+                                    }
+                                    else if (state.Equals("paga"))
+                                    {
+                                    }
+                                }
+                                else
+                                {
+                                    throw new ModelException("Não foi possível alterar o estado da obra.");
+                                }
+                            }
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+                    }
+                }
+            }
+        }
+
+        public bool Invoiced
+        {
+            get
+            {
+                return State.Equals("facturada");
+            }
+        }
+
+        public bool Paid
+        {
+            get
+            {
+                return State.Equals("paga");
+            }
+        }
+
+        public bool Closed
+        {
+            get
+            {
+                return State.Equals("facturada") || State.Equals("paga") || State.Equals("concluída");
+            }
+        }
+
+        private Invoice WorkInvoice;
+        public Invoice Invoice
+        {
+            get
+            {
+                if (!Invoiced && !Paid)
+                {
+                    return null;
+                }
+                if (WorkInvoice != null)
+                {
+                    return WorkInvoice;
+                }
+                WorkInvoice = Invoice.Find(this);
+                return WorkInvoice;
+            }
         }
 
         private Car WorkCar;
@@ -65,7 +156,7 @@ namespace obras_1213.Models
                     using (SqlCommand cmd = new SqlCommand(
                         "select oc.acto, oc.departamento, oc.funcionario, oc.horasRealizadas, oc.estaConcluido, " +
 	                    " a.oficina, a.designacaoA, a.horasEstimadas from ObraContem oc " +
-                        " join Acto a on oc.acto=a.idA and oc.departamento=a.idA and oc.oficina=a.oficina " +
+                        " join Acto a on oc.acto=a.idA and oc.departamento=a.departamento and oc.oficina=a.oficina " +
                         " where oc.obra=@id ", conn))
                     {
                         cmd.Parameters.AddWithValue("@id", ID);
@@ -99,7 +190,7 @@ namespace obras_1213.Models
                         {
                             while (dr.Read())
                             {
-                                yield return new WorkPart(dr.GetString(0), dr.GetString(1), dr.GetDecimal(2), dr.GetInt32(3));
+                                yield return new WorkPart(dr.GetString(0), dr.GetString(1), dr.GetDecimal(2), dr.GetInt32(3), this);
                             }
                         }
                     }
@@ -123,32 +214,6 @@ namespace obras_1213.Models
                         cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
                         cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
                         cmd.Parameters.AddWithValue("@quantidade", part.Quantity).Direction = ParameterDirection.Input;
-                        cmd.ExecuteNonQuery();
-                        return (int)retVal.Value == 0;
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
-            }
-        }
-
-        public bool RemovePart(string part)
-        {
-            try
-            {
-                using (SqlConnection conn = Db.Utils.NewConnection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("RetiraPecaObra", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
-                        retVal.Direction = ParameterDirection.ReturnValue;
-                        cmd.Parameters.AddWithValue("@peca", part).Direction = ParameterDirection.Input;
-                        cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
-                        cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
                         cmd.ExecuteNonQuery();
                         return (int)retVal.Value == 0;
                     }
@@ -268,6 +333,29 @@ namespace obras_1213.Models
                         {
                             newWork = (int)idObra.Value;
                         }
+                        else
+                        {
+                            string msg;
+                            switch ((int)retVal.Value)
+                            {
+                                case -1:
+                                    msg = "Identificador de veículo ou oficina inválido.";
+                                    break;
+                                case -2:
+                                    msg = "Pelo menos uma referência de acto, departamento ou oficina é inválida.";
+                                    break;
+                                case -3:
+                                    msg = "Não foi possível inserir um registo na base de dados.";
+                                    break;
+                                case -4:
+                                    msg = "Não existem funcionários disponíveis para todos os actos.";
+                                    break;
+                                default:
+                                    msg = "Impossível adicionar a obra, erro " + retVal.Value.ToString();
+                                    break;
+                            }
+                            throw new ModelException(msg);
+                        }
                     }
                 }
             }
@@ -276,6 +364,108 @@ namespace obras_1213.Models
                 throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
             }
             return newWork;
+        }
+
+        public bool AddAction(int actionId, int employeeId)
+        {
+            try
+            {
+                Action a = Action.Find(actionId);
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("AdicionaActoObra", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                        retVal.Direction = ParameterDirection.ReturnValue;
+                        cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@acto", a.ID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@departamento", a.DepartmentID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@funcionario", employeeId).Direction = ParameterDirection.Input;
+                        cmd.ExecuteNonQuery();
+                        if ((int)retVal.Value == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            string msg;
+                            switch ((int)retVal.Value)
+                            {
+                                case -1:
+                                    msg = "Não foi possível inserir a informação na base de dados. Será que a combinação já existe?";
+                                    break;
+                                case -2:
+                                    msg = "Pelo menos uma referência é inválida.";
+                                    break;
+                                case -3:
+                                    msg = "O funcionário não pode estar no departamento do acto.";
+                                    break;
+                                default:
+                                    msg = "Impossível adicionar o acto, erro " + retVal.Value.ToString();
+                                    break;
+                            }
+                            throw new ModelException(msg);
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException(
+                    ex.Number == 3609 /* a validação falhou num trigger, que abortou a transacção */
+                        ? "Não é possível adicionar o acto e funcionário escolhidos."
+                        : "Erro na base de dados: " + ex.Message,
+                    ex.InnerException);
+            }
+        }
+
+        public bool Facturar(int cliente)
+        {
+            try
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("FacturarObra", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                        retVal.Direction = ParameterDirection.ReturnValue;
+                        cmd.Parameters.AddWithValue("@obra", ID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@oficina", ShopID).Direction = ParameterDirection.Input;
+                        cmd.Parameters.AddWithValue("@cliente", cliente).Direction = ParameterDirection.Input;
+                        cmd.ExecuteNonQuery();
+                        if ((int)retVal.Value == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            string msg;
+                            switch ((int)retVal.Value)
+                            {
+                                case -2:
+                                    msg = "Pelo menos uma referência é inválida.";
+                                    break;
+                                case -3:
+                                    msg = "A obra já foi facturada.";
+                                    break;
+                                default:
+                                    msg = "Impossível adicionar o acto, erro " + retVal.Value.ToString();
+                                    break;
+                            }
+                            throw new ModelException(msg);
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+            }
         }
     }
 }

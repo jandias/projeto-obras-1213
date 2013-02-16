@@ -30,6 +30,12 @@ namespace obras_1213
             );
 
             routes.MapRoute(
+                "WorkAction",
+                "{controller}/{action}/{id}/{actionId}",
+                new { controller = "Obras" }
+            );
+
+            routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
                 new { controller = "Obras", action = "Index", id = UrlParameter.Optional } // Parameter defaults

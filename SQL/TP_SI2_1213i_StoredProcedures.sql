@@ -8,6 +8,8 @@ DROP FUNCTION EscolheFuncionario
 DROP PROCEDURE FuncionarioRecepcionista
 DROP PROCEDURE RetiraPecaObra
 DROP PROCEDURE AdicionaPecaObra
+DROP PROCEDURE AdicionaActoObra
+DROP PROCEDURE RetiraActoObra
 
 DROP PROCEDURE RemoveCliente
 DROP PROCEDURE AlteraCliente
@@ -21,6 +23,7 @@ DROP PROCEDURE PagarFactura
 DROP PROCEDURE FacturarObra
 DROP PROCEDURE RelatorioAnual
 
+DROP TRIGGER ConclusaoAutomaticaObra
 DROP TRIGGER RegistaHistoricoPeca 
 DROP TRIGGER ValidaProfissaoFuncionarioDepartamento 
 DROP TRIGGER ValidaFuncionarioObra 
@@ -29,41 +32,19 @@ DROP TRIGGER ImpedeRemocaoFuncionario
 DROP TRIGGER ImpedeRemocaoObra 
 GO
 
-
-CREATE PROCEDURE AdicionaPecaObra(@peca REF_PECA, @quantidade INT, @obra INT, @oficina INT)
+/* Uma obra passa, automaticamente, ao estado “concluída” quando todos os seus actos estiverem concluídos */
+CREATE TRIGGER ConclusaoAutomaticaObra ON ObraContem AFTER INSERT, UPDATE
 AS BEGIN
-	BEGIN TRANSACTION
-		INSERT INTO Reserva (peca, oficina, obra, quantP) VALUES (@peca, @oficina, @obra, @quantidade)
-		IF (@@ROWCOUNT = 0) BEGIN
-			ROLLBACK
-			RETURN -2
-		END
-		UPDATE Obra SET valorEstimado = valorEstimado + @quantidade * (SELECT precoP FROM Peca WHERE refP = @peca)
-			WHERE oficina = @oficina AND codO = @obra
-		IF (@@ROWCOUNT = 0) BEGIN
-			ROLLBACK
-			RETURN -2
-		END
-	COMMIT
-END
-GO
-
-CREATE PROCEDURE RetiraPecaObra(@peca REF_PECA, @obra INT, @oficina INT)
-AS BEGIN
-	BEGIN TRANSACTION
-		UPDATE Obra SET valorEstimado = 
-			valorEstimado - (SELECT quantP FROM Reserva WHERE peca = @peca AND oficina = @oficina AND obra = @obra) * (SELECT precoP FROM Peca WHERE refP = @peca)
-			WHERE oficina = @oficina AND codO = @obra
-		IF (@@ROWCOUNT = 0) BEGIN
-			ROLLBACK
-			RETURN -2
-		END
-		DELETE FROM Reserva WHERE peca=@peca AND oficina=@oficina AND obra=@obra
-		IF (@@ROWCOUNT = 0) BEGIN
-			ROLLBACK
-			RETURN -2
-		END
-	COMMIT
+	IF (UPDATE(estaConcluido)) BEGIN
+		UPDATE Obra SET estadoO = 'concluída'
+			WHERE estadoO NOT IN ('concluída', 'facturada', 'paga') 
+			AND codO IN 
+				(SELECT codO FROM
+					(SELECT codO, SUM(CAST(estaConcluido AS INT)) AS concluidos, count(*) AS total FROM Obra o
+					 LEFT JOIN ObraContem oc ON oc.obra=o.codO AND oc.oficina=o.oficina
+					 GROUP BY codO) o
+				 WHERE total > 0 AND concluidos = total)
+	END
 END
 GO
 
@@ -296,7 +277,7 @@ AS BEGIN
 		END
 		
 		INSERT INTO Obra (oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo)
-			VALUES (@oficina, GETDATE(), 'espera peças', 0, 0, @veiculo)
+			VALUES (@oficina, GETDATE(), 'marcada', 0, 0, @veiculo)
 		IF (@@ROWCOUNT = 0) BEGIN
 			ROLLBACK
 			RETURN -3
@@ -318,12 +299,16 @@ AS BEGIN
 			END
 			INSERT INTO ObraContem (obra, oficina, acto, departamento, funcionario, horasRealizadas, estaConcluido)
 				VALUES (@idObra, @oficina, @curActoId, @curDepId, @curFunc, 0, 0) 
+			IF (@@ROWCOUNT = 0) BEGIN
+				ROLLBACK
+				RETURN -3
+			END
 			FETCH NEXT FROM actosCur INTO @curActoId, @curDepId, @curHoras
 		END
 		CLOSE actosCur
 		DEALLOCATE actosCur
 		
-		UPDATE Obra SET totalHorasEstimado=@horasEstimadas WHERE codO=@idObra
+		UPDATE Obra SET totalHorasEstimado=@horasEstimadas, valorEstimado=@horasEstimadas*30 WHERE codO=@idObra
 	COMMIT
 END
 GO
@@ -449,6 +434,9 @@ AS BEGIN
 		
 		UPDATE Factura SET desconto=@desconto*100, totalFactura=@valorTotal-(@valorTotal*@desconto)
 			WHERE numFact=@idFactura
+
+		UPDATE Obra SET estadoO='facturada' 
+			WHERE codO=@obra AND oficina=@oficina
 	COMMIT
 END
 GO
@@ -506,5 +494,85 @@ AS BEGIN
 		SET @recepcionista=1
 	ELSE
 		SET @recepcionista=0
+END
+GO
+
+CREATE PROCEDURE AdicionaActoObra(@obra INT, @oficina INT, @acto INT, @departamento INT, @funcionario INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		DECLARE @ret INT
+		DECLARE @horas REAL
+		EXEC @ret = AtribuiActoFuncionario @acto, @departamento, @oficina, @funcionario
+		IF (@ret < 0) BEGIN
+			ROLLBACK
+			RETURN @ret
+		END
+		INSERT INTO ObraContem (obra, oficina, acto, departamento, funcionario, horasRealizadas, estaConcluido) 
+			VALUES (@obra, @oficina, @acto, @departamento, @funcionario, 0, 0)
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -1
+		END
+		SELECT @horas=horasEstimadas FROM Acto WHERE idA=@acto AND departamento=@departamento AND oficina=@oficina
+		UPDATE Obra
+			SET totalHorasEstimado = totalHorasEstimado + @horas,
+				valorEstimado = valorEstimado + @horas * 30
+			WHERE codO=@obra AND oficina=@oficina
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -1
+		END
+	COMMIT
+END
+GO
+
+CREATE PROCEDURE RetiraActoObra(@obra INT, @oficina INT, @acto INT, @departamento INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		DECLARE @horas REAL
+		SELECT @horas=horasEstimadas FROM Acto WHERE idA=@acto AND departamento=@departamento AND oficina=@oficina
+		DELETE FROM ObraContem WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento
+		UPDATE Obra 
+			SET totalHorasEstimado = totalHorasEstimado - @horas,
+				valorEstimado = valorEstimado - @horas * 30
+			WHERE codO=@obra AND oficina=@oficina
+	COMMIT
+END
+GO
+
+CREATE PROCEDURE AdicionaPecaObra(@peca REF_PECA, @quantidade INT, @obra INT, @oficina INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		INSERT INTO Reserva (peca, oficina, obra, quantP) VALUES (@peca, @oficina, @obra, @quantidade)
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+		UPDATE Obra SET valorEstimado = valorEstimado + @quantidade * (SELECT precoP FROM Peca WHERE refP = @peca)
+			WHERE oficina = @oficina AND codO = @obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+	COMMIT
+END
+GO
+
+CREATE PROCEDURE RetiraPecaObra(@peca REF_PECA, @obra INT, @oficina INT)
+AS BEGIN
+	BEGIN TRANSACTION
+		UPDATE Obra SET valorEstimado = 
+			valorEstimado - (SELECT quantP FROM Reserva WHERE peca = @peca AND oficina = @oficina AND obra = @obra) * (SELECT precoP FROM Peca WHERE refP = @peca)
+			WHERE oficina = @oficina AND codO = @obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+		DELETE FROM Reserva WHERE peca=@peca AND oficina=@oficina AND obra=@obra
+		IF (@@ROWCOUNT = 0) BEGIN
+			ROLLBACK
+			RETURN -2
+		END
+	COMMIT
 END
 GO

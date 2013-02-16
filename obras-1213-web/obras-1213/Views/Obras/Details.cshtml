@@ -5,6 +5,7 @@
 @{
     ViewBag.Title = "Detalhes de obra";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isReceptionist = User.IsInRole("receptionist");
 }
 
 <h2>Detalhes de obra</h2>
@@ -13,85 +14,181 @@
 
 <div class="container">
     <div class="row">
-        <div class="span6">
+        <div class="span4">
             <dl class="dl-horizontal">
                 <dt>Viatura</dt><dd>@Model.Work.CarLicense</dd>
                 <dt>Duração estimada</dt><dd>@Model.Work.PredictedTime horas</dd>
                 <dt>Valor previsto</dt><dd>@Model.Work.PredictedValue &euro;</dd>
             </dl>                
         </div>
-        <div class="span6 text-right">
-        @using (Html.BeginForm("Change", "Obras", FormMethod.Post, new { Class = "form-inline" }))
-        {
-            <b>Estado:</b> @Html.DropDownListFor(m => m.Work.State, new SelectListItem[] { 
-                    new SelectListItem { Value = "marcada", Text = "Marcada" },
-                    new SelectListItem { Value = "em realização", Text = "Em realização" },
-                    new SelectListItem { Value = "espera peças", Text = "Aguarda peças" },
-                    new SelectListItem { Value = "concluída", Text = "Concluída" },
-                    new SelectListItem { Value = "facturada", Text = "Facturada" },
-                    new SelectListItem { Value = "paga", Text = "Paga" }
-                })
-            <button class="btn btn-warning btn" type="submit"><i class="icon-ok-sign"></i>Alterar</button>
-            @Html.HiddenFor(m => m.Work.ID)
-            @Html.HiddenFor(m => m.Work.ShopID)
-        }
+        <div class="span8 text-right">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("marcada") ? "btn-primary" : ""))" 
+                        href="@(Model.Work.Closed || !isReceptionist ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "marcada" }))">
+                        Marcada</a>
+                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("espera peças") ? "btn-primary" : ""))" 
+                        href="@(Model.Work.Closed ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "espera peças" }))">
+                        Espera peças</a>
+                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("em realização") ? "btn-primary" : ""))" 
+                        href="@(Model.Work.Closed ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "em realização" }))">
+                        Em realização</a>
+                    <a class="btn @(Model.Work.Invoiced || Model.Work.Paid ? "btn-inverse" : (Model.Work.State.Equals("concluída") ? "btn-primary" : ""))" 
+                        href="@(Model.Work.Invoiced || !isReceptionist ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "concluída" }))">
+                        Concluída</a>
+                    <a class="btn @(Model.Work.Invoiced ? "btn-primary" : "btn-inverse")" 
+                        href="#">
+                        Facturada</a>
+                    <a class="btn @(Model.Work.Paid ? "btn-primary" : "btn-inverse")" 
+                        href="#">
+                        Paga</a>
+                </div>
+            </div>
+            @if (Model.Work.Closed && !Model.Work.Invoiced && !Model.Work.Paid && isReceptionist)
+            {
+                <br />
+                <form action="@Url.Action("InvoiceTo", new { id = Model.Work.ID })" method="post" class="form-inline">
+                    @Html.Label("customerId", "Facturar ao cliente") @Html.DropDownList("customerId", Model.CustomersToSelect)
+                    <button class="btn btn-success" type="submit">Emitir factura</button>
+                </form>
+            }
         </div>
     </div>
     <div class="row">
-        <div class="span6">
+        <div class="span7">
             <h4>Actos</h4>
             <table class="table">
-                <tr><th>Descrição</th><th>Funcionário</th><th>Horas</th><th>Estado</th><th></th></tr>
+                <tr><th>Descrição</th><th>Funcionário</th><th>Horas</th><th></th></tr>
                 @foreach (WorkAction a in Model.Work.Actions)
                 {
-                    <tr><td>@a.Description</td><td>@a.Employee.Name</td><td>@a.TimeWorked</td>
+                    <tr>
+                        <td>@a.Description</td>
+                        <td>@a.Employee.Name</td>
                         <td>
                             @if (a.Completed)
                             {
-                                <p class="text-success">Completada</p>
+                                @a.TimeWorked
                             }
                             else
                             {
-                                <form action="@Url.Action("CompleteAction", "Obras", new { id = Model.Work.ID })" class="inline-form nopadding nomargin" method="post">
-                                    <input type="hidden" name="actionId" value="@a.ID" />
-                                    <button class="btn btn-success"><i class="icon-ok"></i>Completar</button>
+                                <form action="@Url.Action("ChangeActionTime", "Obras", new  { id = Model.Work.ID, actionId = a.ID })" method="post" class="inline-form nopadding nomargin">
+                                    <div class="input-append">
+                                        <input type="text" name="time" value="@a.TimeWorked" style="width:2em"/>
+                                        <button class="btn btn-success" type="submit"><i class="icon-refresh"></i></button>
+                                    </div>
                                 </form>
                             }
                         </td>
-                        <td>
-                            <form action="@Url.Action("RemoveAction", "Obras", new { id = Model.Work.ID })" class="inline-form nopadding nomargin" method="post">
-                                <input type="hidden" name="actionId" value="@a.ID" />
-                                <button class="btn btn-danger"><i class="icon-remove"></i>Remover</button>
-                            </form>
+                        <td style="text-align:center">
+                            @if (a.Completed)
+                            {
+                                <i class="icon-ok"></i>
+                            }
+                            else if (a.CurrentUserCanComplete)
+                            {
+                                <a href="@Url.Action("CompleteAction", "Obras", new { id = Model.Work.ID, actionId = a.ID })" class="btn btn-warning">
+                                    <i class="icon-ok"></i>
+                                </a>
+                            }
+                            @if (!Model.Work.Closed && !a.Completed && isReceptionist)
+                            {
+                                <a href="@Url.Action("RemoveAction", "Obras", new { id = Model.Work.ID, actionId = a.ID })" class="btn btn-danger">
+                                    <i class="icon-remove"></i>
+                                </a>
+                            }
                         </td>
+                    </tr>
+                }
+                @if (!Model.Work.Closed && isReceptionist)
+                {
+                    <tr>
+                        <form action="@Url.Action("AddAction", "Obras", new  { id = Model.Work.ID })" method="post" class="inline-form">
+                            <td>@Html.DropDownList("actionId", Model.ActionsToSelect)</td>
+                            <td>@Html.DropDownList("employeeId", Model.EmployeeToSelect)</td>
+                            <td colspan="2"><button class="btn btn-success"><i class="icon-plus-sign"></i> Adicionar</button></td>
+                        </form>
                     </tr>
                 }
             </table>
         </div>
-        <div class="span6">
+        <div class="span5">
             <h4>Peças</h4>
             <table class="table">
-            <tr><th>Descrição</th><th>Preço</th><th>Quantidade</th><th></th></tr>
+            <tr><th>Descrição</th><th>Quantidade</th><th>Preço</th><th></th></tr>
             @foreach (WorkPart p in Model.Work.Parts)
             {
-                <tr><td>@p.Description</td><td>@p.Price &euro;</td><td>@p.Quantity</td>
+                <tr><td>@p.Description</td><td>@p.Quantity</td><td>@(p.Price * p.Quantity) &euro;</td>
                     <td>
-                        <form action="@Url.Action("RemovePart", "Obras", new { id = Model.Work.ID })" 
-                            class="inline-form nopadding nomargin" method="post">
-                            <input type="hidden" name="partId" value="@p.ID" />
-                            <button class="btn btn-danger"><i class="icon-remove"></i>Remover</button>
-                        </form>
+                        @if (!Model.Work.Closed)
+                        {
+                            <form action="@Url.Action("RemovePart", "Obras", new { id = Model.Work.ID })" 
+                                class="inline-form nopadding nomargin" method="post">
+                                <input type="hidden" name="partId" value="@p.ID" />
+                                <button class="btn btn-danger"><i class="icon-remove"></i></button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }
-            <tr>
-            <form action="@Url.Action("AddPart", "Obras", new { id = Model.Work.ID })" class="inline-form" method="post">
-                <td colspan="2">@Html.DropDownList("newPart.ID", Model.PartsToSelect)</td>
-                <td><input name="newPart.Quantity" type="number" min="1" max="99" style="width:3em;"/></td>
-                <td><button class="btn btn-success btn" type="submit"><i class="icon-plus-sign"></i>Adicionar</button></td>
-            </form>
-            </tr>
+            @if (!Model.Work.Closed)
+            {
+                <tr>
+                <form action="@Url.Action("AddPart", "Obras", new { id = Model.Work.ID })" class="inline-form" method="post">
+                    <td>@Html.DropDownList("newPart.ID", Model.PartsToSelect)</td>
+                    <td><input name="newPart.Quantity" type="number" min="1" max="99" style="width:3em;"/></td>
+                    <td colspan="2"><button class="btn btn-success btn" type="submit"><i class="icon-plus-sign"></i> Adicionar</button></td>
+                </form>
+                </tr>
+            }
             </table>
         </div>
     </div>
+    @if (Model.Work.Invoice != null)
+    {
+        <div class="row">
+            <div class="span12">
+                <h4>Factura</h4>
+            </div>
+            <div class="span6">
+                <dl class="dl-horizontal">
+                    <dt>Número</dt><dd>@Model.Work.Invoice.ID</dd>
+                    <dt>Data</dt><dd>@Model.Work.Invoice.Date.ToShortDateString()</dd>
+                    <dt>Estado</dt><dd class="@(Model.Work.Invoice.Paid ? "text-success" : "text-warning")">@Model.Work.Invoice.State</dd>
+                    <dt>&nbsp;</dt><dd>&nbsp;</dd>
+                    <dt>Cliente</dt><dd>@Model.Work.Invoice.Customer.Nome</dd>
+                    <dt>&nbsp;</dt><dd>&nbsp;</dd>
+                    <dt>Desconto</dt><dd>@Model.Work.Invoice.Discount %</dd>
+                    <dt>Total</dt><dd>@Model.Work.Invoice.Total &euro;</dd>
+                    @if (!Model.Work.Invoice.Paid && isReceptionist)
+                    {
+                        <dt>&nbsp;</dt><dd>&nbsp;</dd>
+                        <dt>&nbsp;</dt><dd><a href="@Url.Action("Pay", new { id = Model.Work.ID })" class="btn btn-warning">Pagar</a></dd>
+                    }
+                </dl>
+            </div>
+            <div class="span6">
+                <table class="table">
+                    <tr><th></th><th>Descrição</th><th>Preço unitário</th><th>Quantidade</th><th>Valor</th></tr>
+                    @{ 
+                        decimal total = 0;
+                        foreach (InvoiceLine l in Model.Work.Invoice.Lines)
+                        {
+                            <tr>
+                                <td>@l.ID</td>
+                                <td>@l.Description</td>
+                                <td>@l.UnitPrice &euro;</td>
+                                <td>@l.Quantity</td>
+                                <td>@l.LineTotal &euro;</td>
+                            </tr>
+                            total += l.LineTotal;
+                        }
+                        <tr>
+                            <td colspan="4" style="text-align: right !important"><i>Sub-total</i></td>
+                            <td><i>@total &euro;</i></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
 </div>

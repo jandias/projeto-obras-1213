@@ -11,9 +11,12 @@
         <h2 class="nomargin">Obras</h2>
     </div>
     <div class="span6 text-right">
-        <a href="@Url.Action("New")" class="btn btn-success">
-            <i class="icon-plus-sign"></i> Inserir uma obra nova
-        </a>
+        @if (User.IsInRole("receptionist")) 
+        {
+            <a href="@Url.Action("New")" class="btn btn-success">
+                <i class="icon-plus-sign"></i> Inserir uma obra nova
+            </a>
+        }
     </div>
 </div>
 
