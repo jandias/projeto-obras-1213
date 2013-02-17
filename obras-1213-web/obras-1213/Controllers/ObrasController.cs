@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml;
 
 namespace obras_1213.Controllers
 {
@@ -35,6 +36,37 @@ namespace obras_1213.Controllers
             {
                 ModelState.AddModelError("", ex);
                 return Index();
+            }
+        }
+
+        [HttpGet, Authorize]
+        public ActionResult Download(int id)
+        {
+            try
+            {
+                Response.ContentType = "text/xml; charset=utf-16";
+
+                return this.Content(new WorkViewModel( Work.Find(id)).SerializeToString(),
+                    "text/xml", System.Text.Encoding.Unicode);
+            }
+            catch (ModelException ex)
+            {
+                ModelState.AddModelError("", ex);
+                return Index();
+            }
+        }
+
+        [HttpPost]
+        public ActionResult OfflineDetails( )
+        {
+            try
+            {
+                return View("DetailsOffline", WorkViewModel.Deserialize(Request.Files["WorkFile"].InputStream));
+            }
+            catch (ModelException ex)
+            {
+                ModelState.AddModelError("", ex);
+                return RedirectToAction("Index", "Login");
             }
         }
 

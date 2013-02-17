@@ -4,9 +4,30 @@
 
 @{
     ViewBag.Title = "Detalhes de obra";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    bool isReceptionist = User.IsInRole("receptionist");
+    Layout = null;
+    bool isReceptionist = false;
 }
+
+<!DOCTYPE html>
+<html>
+    @Html.Partial("_Header")
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="/">Obras 11/12</a>
+          <div class="nav-collapse collapse">
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
 
 <h2>Detalhes de obra</h2>
 
@@ -15,11 +36,6 @@
 <div class="container">
     <div class="row">
         <div class="span4">
-            <div class="btn-toolbar">
-                <div class="btn-group">
-                    <a class="btn" href="@Url.Action("Download", "Obras", new { id = Model.Work.ID })">Obter cópia</a>
-                </div>
-            </div>
             <dl class="dl-horizontal">
                 <dt>Viatura</dt><dd>@Model.Work.CarLicense</dd>
                 <dt>Duração estimada</dt><dd>@Model.Work.PredictedTime horas</dd>
@@ -29,23 +45,23 @@
         <div class="span8 text-right">
             <div class="btn-toolbar">
                 <div class="btn-group">
-                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("marcada") ? "btn-primary" : ""))" 
-                        href="@(Model.Work.Closed || !isReceptionist ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "marcada" }))">
+                    <a class="btn disabled @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("marcada") ? "btn-primary" : ""))" 
+                        href="/" onclick="return false;">
                         Marcada</a>
-                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("espera peças") ? "btn-primary" : ""))" 
-                        href="@(Model.Work.Closed ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "espera peças" }))">
+                    <a class="btn disabled @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("espera peças") ? "btn-primary" : ""))" 
+                        href="/" onclick="return false;">
                         Espera peças</a>
-                    <a class="btn @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("em realização") ? "btn-primary" : ""))" 
-                        href="@(Model.Work.Closed ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "em realização" }))">
+                    <a class="btn disabled @(Model.Work.Closed ? "btn-inverse" : (Model.Work.State.Equals("em realização") ? "btn-primary" : ""))" 
+                        href="/" onclick="return false;">
                         Em realização</a>
-                    <a class="btn @(Model.Work.Invoiced || Model.Work.Paid ? "btn-inverse" : (Model.Work.State.Equals("concluída") ? "btn-primary" : ""))" 
-                        href="@(Model.Work.Invoiced || !isReceptionist ? "#" : Url.Action("ChangeState", new { id = Model.Work.ID, state = "concluída" }))">
+                    <a class="btn disabled @(Model.Work.Invoiced || Model.Work.Paid ? "btn-inverse" : (Model.Work.State.Equals("concluída") ? "btn-primary" : ""))" 
+                        href="/" onclick="return false;">
                         Concluída</a>
-                    <a class="btn @(Model.Work.Invoiced ? "btn-primary" : "btn-inverse")" 
-                        href="#">
+                    <a class="btn disabled @(Model.Work.Invoiced ? "btn-primary" : "btn-inverse")" 
+                        href="/" onclick="return false;">
                         Facturada</a>
-                    <a class="btn @(Model.Work.Paid ? "btn-primary" : "btn-inverse")" 
-                        href="#">
+                    <a class="btn disabled @(Model.Work.Paid ? "btn-primary" : "btn-inverse")" 
+                        href="/" onclick="return false;">
                         Paga</a>
                 </div>
             </div>
@@ -69,21 +85,7 @@
                     <tr>
                         <td>@a.Description</td>
                         <td>@a.Employee.Name</td>
-                        <td>
-                            @if (a.Completed)
-                            {
-                                @a.TimeWorked
-                            }
-                            else
-                            {
-                                <form action="@Url.Action("ChangeActionTime", "Obras", new  { id = Model.Work.ID, actionId = a.ID })" method="post" class="inline-form nopadding nomargin">
-                                    <div class="input-append">
-                                        <input type="text" name="time" value="@a.TimeWorked" style="width:2em"/>
-                                        <button class="btn btn-success" type="submit"><i class="icon-refresh"></i></button>
-                                    </div>
-                                </form>
-                            }
-                        </td>
+                        <td>@a.TimeWorked</td>
                         <td style="text-align:center">
                             @if (a.Completed)
                             {
@@ -104,16 +106,6 @@
                         </td>
                     </tr>
                 }
-                @if (!Model.Work.Closed && isReceptionist)
-                {
-                    <tr>
-                        <form action="@Url.Action("AddAction", "Obras", new  { id = Model.Work.ID })" method="post" class="inline-form">
-                            <td>@Html.DropDownList("actionId", Model.ActionsToSelect)</td>
-                            <td>@Html.DropDownList("employeeId", Model.EmployeeToSelect)</td>
-                            <td colspan="2"><button class="btn btn-success"><i class="icon-plus-sign"></i> Adicionar</button></td>
-                        </form>
-                    </tr>
-                }
             </table>
         </div>
         <div class="span5">
@@ -124,25 +116,7 @@
             {
                 <tr><td>@p.Description</td><td>@p.Quantity</td><td>@(p.Price * p.Quantity) &euro;</td>
                     <td>
-                        @if (!Model.Work.Closed)
-                        {
-                            <form action="@Url.Action("RemovePart", "Obras", new { id = Model.Work.ID })" 
-                                class="inline-form nopadding nomargin" method="post">
-                                <input type="hidden" name="partId" value="@p.ID" />
-                                <button class="btn btn-danger"><i class="icon-remove"></i></button>
-                            </form>
-                        }
                     </td>
-                </tr>
-            }
-            @if (!Model.Work.Closed)
-            {
-                <tr>
-                <form action="@Url.Action("AddPart", "Obras", new { id = Model.Work.ID })" class="inline-form" method="post">
-                    <td>@Html.DropDownList("newPart.ID", Model.PartsToSelect)</td>
-                    <td><input name="newPart.Quantity" type="number" min="1" max="99" style="width:3em;"/></td>
-                    <td colspan="2"><button class="btn btn-success btn" type="submit"><i class="icon-plus-sign"></i> Adicionar</button></td>
-                </form>
                 </tr>
             }
             </table>
@@ -197,3 +171,8 @@
         </div>
     }
 </div>
+
+               
+    </div>
+</body>
+</html>

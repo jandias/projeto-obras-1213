@@ -21,6 +21,10 @@ namespace obras_1213.Models
 
         private string state;
 
+        public Work()
+        {
+        }
+
         public Work(int shop, string car)
         {
             ShopID = shop;
@@ -50,6 +54,11 @@ namespace obras_1213.Models
             }
             set
             {
+                if (state == null)
+                {
+                    state = value;
+                    return;
+                }
                 if (!state.Equals(value))
                 {
                     try

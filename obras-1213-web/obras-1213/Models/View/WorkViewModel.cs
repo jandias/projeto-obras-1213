@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml.Serialization;
 
 namespace obras_1213.Models.View
 {
     public class WorkViewModel
     {
         public Work Work { get; set; }
+
+        public WorkViewModel()
+        {
+        }
 
         public WorkViewModel(Work w)
         {
@@ -56,6 +62,29 @@ namespace obras_1213.Models.View
                 {
                     yield return new SelectListItem() { Value = c.ID.ToString(), Text = c.Nome };
                 }
+            }
+        }
+
+        public string SerializeToString()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(WorkViewModel));
+            using (StringWriter sw = new StringWriter())
+            {
+                ser.Serialize(sw, this);
+                return sw.ToString();
+            }
+        }
+
+        public static WorkViewModel Deserialize(Stream xmlStream)
+        {
+            try
+            {
+                XmlSerializer ser = new XmlSerializer(typeof(WorkViewModel));
+                return (WorkViewModel)ser.Deserialize(xmlStream);
+            }
+            catch (Exception e)
+            {
+                throw new ModelException("Erro de processamento: " + e.Message, e);
             }
         }
     }

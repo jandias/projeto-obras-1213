@@ -231,6 +231,7 @@
     <Content Include="Views\Cars\Index.cshtml" />
     <Content Include="Views\Obras\New.cshtml" />
     <Content Include="Views\Customer\Index.cshtml" />
+    <Content Include="Views\Obras\DetailsOffline.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
