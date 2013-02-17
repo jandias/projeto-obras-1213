@@ -45,7 +45,7 @@ namespace obras_1213.Controllers
             try
             {
                 Response.ContentType = "text/xml; charset=utf-16";
-
+                Response.AddHeader("Content-Disposition", "attachment; filename=\"obra" + id.ToString() + ".xml\"");
                 return this.Content(new WorkViewModel( Work.Find(id)).SerializeToString(),
                     "text/xml", System.Text.Encoding.Unicode);
             }
