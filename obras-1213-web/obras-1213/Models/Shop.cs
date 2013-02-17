@@ -27,6 +27,37 @@ namespace obras_1213.Models
             ManagerID = manager;
         }
 
+        public static string FindAllXml()
+        {
+            try
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(
+                        "select " +
+                        "	Oficina.codOfic, Oficina.faxOfic, Oficina.moradaOfic, Oficina.nifOfic, Oficina.nomeOfic, Oficina.telefoneOfic, " +
+                        "	Responsavel.nomeFunc " +
+                        "from Oficina " +
+                        "join Funcionario as Responsavel on Responsavel.codFunc=Oficina.responsavel " +
+                        "for xml auto, root('Oficinas')", conn))
+                    {
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                return dr.GetString(0);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+            }
+            return "";
+        }
+
         public static IEnumerable<Shop> FindAll()
         {
             using (SqlConnection conn = Db.Utils.NewConnection)
