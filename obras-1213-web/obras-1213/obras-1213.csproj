@@ -115,6 +115,7 @@
     <Compile Include="Models\InvoiceLine.cs" />
     <Compile Include="Models\ModelException.cs" />
     <Compile Include="Models\Part.cs" />
+    <Compile Include="Models\View\AllWorksViewModel.cs" />
     <Compile Include="Models\View\NewWorkViewModel.cs" />
     <Compile Include="Models\View\WorkViewModel.cs" />
     <Compile Include="Models\Work.cs" />

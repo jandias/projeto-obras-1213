@@ -276,6 +276,30 @@ namespace obras_1213.Models
             }
         }
 
+        public static IEnumerable<Work> FindAll(bool open, DateTime since)
+        {
+            string sql = 
+                    "select oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo, codO " +
+                    "from Obra where estadoO " + (open ? "" : "not") + " in ('marcada', 'em realização', 'espera peças') " +
+                    " and dataRegistoO >= @data ";
+            using (SqlConnection conn = Db.Utils.NewConnection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@data", since);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            yield return new Work(dr.GetInt32(6), dr.GetInt32(0), dr.GetDateTime(1), dr.GetString(2),
+                                dr.GetDecimal(3), dr.GetFloat(4), dr.GetString(5));
+                        }
+                    }
+                }
+            }
+        }
+
         [XmlRoot(ElementName="actos")]
         public class Actos
         {

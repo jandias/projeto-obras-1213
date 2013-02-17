@@ -15,7 +15,13 @@ namespace obras_1213.Controllers
         [HttpGet, Authorize]
         public ActionResult Index()
         {
-            return View(Work.FindAll());
+            return View(new AllWorksViewModel());
+        }
+
+        [HttpPost, Authorize]
+        public ActionResult Index(AllWorksViewModel cfg)
+        {
+            return View(cfg);
         }
 
         [HttpGet, Authorize]
@@ -28,7 +34,7 @@ namespace obras_1213.Controllers
             catch (ModelException ex)
             {
                 ModelState.AddModelError("", ex);
-                return View("Index");
+                return Index();
             }
         }
 

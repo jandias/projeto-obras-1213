@@ -1,35 +1,97 @@
 ﻿@using obras_1213.Models
-@model IEnumerable<Work>
+@using obras_1213.Models.View
+@model AllWorksViewModel
 
 @{
     ViewBag.Title = "Obras";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int count = 0;
 }
 
-<div class="row">
-    <div class="span6">
-        <h2 class="nomargin">Obras</h2>
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            @Html.ValidationSummary(false)
+        </div>
     </div>
-    <div class="span6 text-right">
-        @if (User.IsInRole("receptionist")) 
-        {
-            <a href="@Url.Action("New")" class="btn btn-success">
-                <i class="icon-plus-sign"></i> Inserir uma obra nova
-            </a>
-        }
+
+    <div class="row">
+        <div class="span4">
+            <h2 class="nomargin">Obras em curso</h2>
+        </div>
+        <div class="span5 text-right">
+            @if (User.IsInRole("receptionist")) 
+            {
+                <a href="@Url.Action("New")" class="btn btn-success">
+                    <i class="icon-plus-sign"></i> Inserir uma obra nova
+                </a>
+            }
+        </div>
+        <div class="span3 text-right">
+            <form action="@Url.Action("Index")" class="form-inline nomargin nopadding" method="post">
+                @Html.HiddenFor(m => m.ClosedSince)
+                <div class="input-prepend input-append">
+                    <span class="add-on">Desde</span>
+                    <input class="span2 date" name="OpenSince" type="text" value="@Model.OpenSince.ToShortDateString()" />
+                    <button class="btn" type="submit"><i class="icon-refresh"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+            <table class="table">
+            <tr><th></th><th>Data de inserção</th><th>Estado</th><th>Valor estimado</th><th>Duração estimada</th><th>Viatura</th></tr>
+            @{
+                count = 0;
+                foreach(Work w in Model.OpenWorks) {
+                    ++count;
+                    <tr><td><a href="@Url.Action("Details", "Obras", new { id = w.ID })">@w.ID <i class="icon-circle-arrow-right"></i></a></td>
+                        <td>@w.IssuanceDate</td><td>@w.State</td><td>@w.PredictedValue €</td><td>@w.PredictedTime</td><td>@w.CarLicense</td></tr>
+                }
+                if (count == 0)
+                {
+                    <tr><td colspan="6"><i>Não existem obras abertas registadas no sistema desde @Model.OpenSince.ToShortDateString().</i></td></tr>
+                }
+            }
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span4">
+            <h2 class="nomargin nopadding">Obras concluídas</h2>
+        </div>
+        <div class="span8 text-right">
+            <form action="@Url.Action("Index")" class="form-inline nomargin nopadding" method="post">
+                @Html.HiddenFor(m => m.OpenSince)
+                <div class="input-prepend input-append">
+                    <span class="add-on">Desde</span>
+                    <input class="span2 date" name="ClosedSince" type="text" value="@Model.ClosedSince.ToShortDateString()" />
+                    <button class="btn" type="submit"><i class="icon-refresh"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+            <table class="table">
+            <tr><th></th><th>Data de inserção</th><th>Estado</th><th>Valor estimado</th><th>Duração estimada</th><th>Viatura</th></tr>
+            @{
+                count = 0;
+                foreach(Work w in Model.ClosedWorks) {
+                    ++count;
+                    <tr><td><a href="@Url.Action("Details", "Obras", new { id = w.ID })">@w.ID <i class="icon-circle-arrow-right"></i></a></td>
+                        <td>@w.IssuanceDate</td><td>@w.State</td><td>@w.PredictedValue €</td><td>@w.PredictedTime</td><td>@w.CarLicense</td></tr>
+                }
+                if (count == 0)
+                {
+                    <tr><td colspan="6"><i>Não existem obras concluídas registadas no sistema desde @Model.ClosedSince.ToShortDateString().</i></td></tr>
+                }
+            }
+            </table>
+        </div>
     </div>
 </div>
-
-@Html.ValidationSummary(false)
-<br />
-
-<table class="table table-striped">
-<tr><th>Número</th><th>Data de inserção</th><th>Estado</th><th>Valor estimado</th><th>Duração estimada</th><th>Viatura</th></tr>
-@foreach(Work w in Model) {
-    <tr><td><a href="@Url.Action("Details", "Obras", new { id = w.ID })">@w.ID <i class="icon-circle-arrow-right"></i></a></td>
-        <td>@w.IssuanceDate</td><td>@w.State</td><td>@w.PredictedValue €</td><td>@w.PredictedTime</td><td>@w.CarLicense</td></tr>
-}
-@if (Model.Count() == 0) {
-    <tr><td colspan="6"><i>Não existem obras registadas no sistema.</i></td></tr>
-}
-</table>
