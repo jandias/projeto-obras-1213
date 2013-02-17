@@ -5,7 +5,6 @@
 @{
     ViewBag.Title = "Detalhes de obra";
     Layout = null;
-    bool isReceptionist = false;
 }
 
 <!DOCTYPE html>
@@ -21,8 +20,6 @@
             <span class="icon-bar"></span>
           </button>
           <a class="brand" href="/">Obras 11/12</a>
-          <div class="nav-collapse collapse">
-          </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
@@ -65,14 +62,6 @@
                         Paga</a>
                 </div>
             </div>
-            @if (Model.Work.Closed && !Model.Work.Invoiced && !Model.Work.Paid && isReceptionist)
-            {
-                <br />
-                <form action="@Url.Action("InvoiceTo", new { id = Model.Work.ID })" method="post" class="form-inline">
-                    @Html.Label("customerId", "Facturar ao cliente") @Html.DropDownList("customerId", Model.CustomersToSelect)
-                    <button class="btn btn-success" type="submit">Emitir factura</button>
-                </form>
-            }
         </div>
     </div>
     <div class="row">
@@ -90,18 +79,6 @@
                             @if (a.Completed)
                             {
                                 <i class="icon-ok"></i>
-                            }
-                            else if (a.CurrentUserCanComplete)
-                            {
-                                <a href="@Url.Action("CompleteAction", "Obras", new { id = Model.Work.ID, actionId = a.ID })" class="btn btn-warning">
-                                    <i class="icon-ok"></i>
-                                </a>
-                            }
-                            @if (!Model.Work.Closed && !a.Completed && isReceptionist)
-                            {
-                                <a href="@Url.Action("RemoveAction", "Obras", new { id = Model.Work.ID, actionId = a.ID })" class="btn btn-danger">
-                                    <i class="icon-remove"></i>
-                                </a>
                             }
                         </td>
                     </tr>
@@ -138,11 +115,6 @@
                     <dt>&nbsp;</dt><dd>&nbsp;</dd>
                     <dt>Desconto</dt><dd>@Model.Work.Invoice.Discount %</dd>
                     <dt>Total</dt><dd>@Model.Work.Invoice.Total &euro;</dd>
-                    @if (!Model.Work.Invoice.Paid && isReceptionist)
-                    {
-                        <dt>&nbsp;</dt><dd>&nbsp;</dd>
-                        <dt>&nbsp;</dt><dd><a href="@Url.Action("Pay", new { id = Model.Work.ID })" class="btn btn-warning">Pagar</a></dd>
-                    }
                 </dl>
             </div>
             <div class="span6">
