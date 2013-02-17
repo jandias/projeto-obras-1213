@@ -12,6 +12,13 @@
 @using (Html.BeginForm("New", "Obras", FormMethod.Post, new { Class = "form-horizontal" }))
 {
     <div class="control-group">
+        <label for="ShopID" class= "control-label">Oficina</label>
+        <div class="controls">
+            @Html.DropDownListFor(m => m.ShopID, Model.ShopsForSelect)
+            @Html.ValidationMessageFor(m => m.ShopID)
+        </div>
+    </div>
+    <div class="control-group">
         <label for="CarLicensePlate" class= "control-label">Viatura</label>
         <div class="controls">
             @Html.DropDownListFor(m => m.CarLicensePlate, Model.CarsForSelect)

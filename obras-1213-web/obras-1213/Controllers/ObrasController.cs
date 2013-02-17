@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace obras_1213.Controllers
 {
-    public class ObrasController : Controller
+    public class ObrasController : BaseController
     {
         //
         // GET: /Obras/
@@ -73,7 +73,7 @@ namespace obras_1213.Controllers
         [HttpGet, Authorize(Roles = "receptionist")]
         public ActionResult New()
         {
-            return View(new NewWorkViewModel());
+            return View(new NewWorkViewModel() { ShopID = this.ShopID });
         }
 
         [HttpPost, Authorize(Roles = "receptionist")]
@@ -83,7 +83,7 @@ namespace obras_1213.Controllers
             {
                 try
                 {
-                    return RedirectToAction("Details", new { id = Work.Insert(1, newWork.CarLicensePlate, newWork.Actions) });
+                    return RedirectToAction("Details", new { id = Work.Insert(newWork.ShopID, newWork.CarLicensePlate, newWork.Actions) });
                 }
                 catch (ModelException ex)
                 {

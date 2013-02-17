@@ -13,7 +13,9 @@ namespace obras_1213.Models
     public class Work
     {
         public int ID { get; set; }
+        [Required(ErrorMessage="É preciso indicar a oficina da obra.")]
         public int ShopID { get; set; }
+        [Required(ErrorMessage = "É preciso indicar a date de registo.")]
         public DateTime IssuanceDate { get; set; }
         public decimal PredictedValue { get; set; }
         public float PredictedTime { get; set; }
