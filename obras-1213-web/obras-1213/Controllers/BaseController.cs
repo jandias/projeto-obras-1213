@@ -20,5 +20,18 @@ namespace obras_1213.Controllers
                 Session["employee"] = value;
             }
         }
+
+        protected int ShopID
+        {
+            get
+            {
+                object s = Session["shop"];
+                return (s != null ? (int)s : 0);
+            }
+            set
+            {
+                Session["shop"] = value;
+            }
+        }
     }
 }

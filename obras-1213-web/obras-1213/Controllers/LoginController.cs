@@ -1,4 +1,5 @@
 ﻿using obras_1213.Models;
+using obras_1213.Models.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,23 +14,27 @@ namespace obras_1213.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            return View();
+            return View(new LoginViewModel());
         }
 
         [HttpPost]
-        public ActionResult Index(string employeeNumber, string ReturnUrl)
+        public ActionResult Index(LoginViewModel login, string ReturnUrl)
         {
-            if (Membership.ValidateUser(employeeNumber, ""))
+            if (ModelState.IsValid)
             {
-                FormsAuthentication.SetAuthCookie(employeeNumber, false);
-                this.Employee = Employee.Find(Int32.Parse(employeeNumber));
-                return Redirect(String.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl);
+                if (Membership.ValidateUser(login.EmployeeID.ToString(), ""))
+                {
+                    FormsAuthentication.SetAuthCookie(login.EmployeeID.ToString(), false);
+                    this.Employee = Employee.Find(login.EmployeeID);
+                    this.ShopID = login.ShopID;
+                    return Redirect(String.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Número de funcionário incorrecto.");
+                }
             }
-            else
-            {
-                ModelState.AddModelError("", "Número de funcionário incorrecto.");
-            }
-            return View();
+            return View(login);
         }
 
         [HttpGet]

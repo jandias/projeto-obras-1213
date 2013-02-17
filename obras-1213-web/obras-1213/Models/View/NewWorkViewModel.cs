@@ -9,11 +9,24 @@ namespace obras_1213.Models.View
 {
     public class NewWorkViewModel
     {
+        [Required(ErrorMessage = "É preciso indicar a oficina a que a obra pertence.")]
+        public int ShopID { get; set; }
         [Required(ErrorMessage="É necessário atribuir uma viatura à obra.")]
         public string CarLicensePlate { get; set; }
         [Required(ErrorMessage = "Tem de definir pelo menos um acto a executar.")]
         [AllowHtml]
         public string[] Actions { get; set; }
+
+        public IEnumerable<SelectListItem> ShopsForSelect
+        {
+            get
+            {
+                foreach (Shop s in Shop.FindAll())
+                {
+                    yield return new SelectListItem() { Value = s.ID.ToString(), Text = s.Name };
+                }
+            }
+        }
 
         public IEnumerable<SelectListItem> ActionsForSelect
         {

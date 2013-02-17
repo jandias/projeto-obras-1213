@@ -1,4 +1,8 @@
-﻿@{
+﻿@using obras_1213.Models
+@using obras_1213.Models.View
+@model LoginViewModel
+
+@{
     Layout = null;
 }
 
@@ -49,7 +53,8 @@
       <form class="form-signin" method="post">
         <h2 class="form-signin-heading">Por favor identifique-se.</h2>
         @Html.ValidationSummary(false, "A autenticação falhou.")
-        <input type="text" class="input-block-level" placeholder="Número de funcionário" name="employeeNumber">
+        <input type="text" class="input-block-level" placeholder="Número de funcionário" name="EmployeeID">
+        @Html.DropDownList("ShopID", Model.ShopsToSelect)
         <button class="btn btn-large btn-primary" type="submit">Entrar</button>
       </form>
 
