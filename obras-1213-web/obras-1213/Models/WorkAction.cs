@@ -15,6 +15,7 @@ namespace obras_1213.Models
         public int WorkID { get; set; }
         public int EmployeeID { get; set; }
 
+        public WorkAction() { }
         public WorkAction(int actionid, int department, int shop, string description, float timePredicted,
                           int employee, int work, float timeWorked, bool isCompleted)
             : base(actionid, department, shop, description, timePredicted)

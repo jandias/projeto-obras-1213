@@ -11,6 +11,7 @@ namespace obras_1213.Models.View
     public class WorkViewModel
     {
         public Work Work { get; set; }
+        public DateTime SaveDate { get; set; }
 
         public WorkViewModel()
         {
@@ -67,9 +68,14 @@ namespace obras_1213.Models.View
 
         public string SerializeToString()
         {
+            this.SaveDate = DateTime.Now;
+            this.Work.SerializedActions = this.Work.Actions.ToList();
+            this.Work.SerializedParts = this.Work.Parts.ToList();
             XmlSerializer ser = new XmlSerializer(typeof(WorkViewModel));
             using (StringWriter sw = new StringWriter())
             {
+                //List<WorkPart> parts = this.Work.Parts.ToList;
+
                 ser.Serialize(sw, this);
                 return sw.ToString();
             }

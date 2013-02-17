@@ -28,11 +28,12 @@
 
 <h2>Detalhes de obra</h2>
 
-@Html.ValidationSummary(false, "Não foi possível alterar a obra.")
+@Html.ValidationSummary(false, "Não foi possível ler a obra.")
 
 <div class="container">
     <div class="row">
         <div class="span4">
+            <i>Modo desligado: imagem obtida a @Model.SaveDate</i>
             <dl class="dl-horizontal">
                 <dt>Viatura</dt><dd>@Model.Work.CarLicense</dd>
                 <dt>Duração estimada</dt><dd>@Model.Work.PredictedTime horas</dd>
@@ -69,7 +70,7 @@
             <h4>Actos</h4>
             <table class="table">
                 <tr><th>Descrição</th><th>Funcionário</th><th>Horas</th><th></th></tr>
-                @foreach (WorkAction a in Model.Work.Actions)
+                @foreach (WorkAction a in Model.Work.SerializedActions)
                 {
                     <tr>
                         <td>@a.Description</td>
@@ -89,7 +90,7 @@
             <h4>Peças</h4>
             <table class="table">
             <tr><th>Descrição</th><th>Quantidade</th><th>Preço</th><th></th></tr>
-            @foreach (WorkPart p in Model.Work.Parts)
+            @foreach (WorkPart p in Model.Work.SerializedParts)
             {
                 <tr><td>@p.Description</td><td>@p.Quantity</td><td>@(p.Price * p.Quantity) &euro;</td>
                     <td>
@@ -99,7 +100,7 @@
             </table>
         </div>
     </div>
-    @if (Model.Work.Invoice != null)
+    @if (Model.Work.WorkInvoice != null)
     {
         <div class="row">
             <div class="span12">
@@ -107,14 +108,14 @@
             </div>
             <div class="span6">
                 <dl class="dl-horizontal">
-                    <dt>Número</dt><dd>@Model.Work.Invoice.ID</dd>
-                    <dt>Data</dt><dd>@Model.Work.Invoice.Date.ToShortDateString()</dd>
-                    <dt>Estado</dt><dd class="@(Model.Work.Invoice.Paid ? "text-success" : "text-warning")">@Model.Work.Invoice.State</dd>
+                    <dt>Número</dt><dd>@Model.Work.WorkInvoice.ID</dd>
+                    <dt>Data</dt><dd>@Model.Work.WorkInvoice.Date.ToShortDateString()</dd>
+                    <dt>Estado</dt><dd class="@(Model.Work.WorkInvoice.Paid ? "text-success" : "text-warning")">@Model.Work.WorkInvoice.State</dd>
                     <dt>&nbsp;</dt><dd>&nbsp;</dd>
-                    <dt>Cliente</dt><dd>@Model.Work.Invoice.Customer.Nome</dd>
+                    <dt>Cliente</dt><dd>@Model.Work.WorkInvoice.Customer.Nome</dd>
                     <dt>&nbsp;</dt><dd>&nbsp;</dd>
-                    <dt>Desconto</dt><dd>@Model.Work.Invoice.Discount %</dd>
-                    <dt>Total</dt><dd>@Model.Work.Invoice.Total &euro;</dd>
+                    <dt>Desconto</dt><dd>@Model.Work.WorkInvoice.Discount %</dd>
+                    <dt>Total</dt><dd>@Model.Work.WorkInvoice.Total &euro;</dd>
                 </dl>
             </div>
             <div class="span6">
@@ -122,7 +123,7 @@
                     <tr><th></th><th>Descrição</th><th>Preço unitário</th><th>Quantidade</th><th>Valor</th></tr>
                     @{ 
                         decimal total = 0;
-                        foreach (InvoiceLine l in Model.Work.Invoice.Lines)
+                        foreach (InvoiceLine l in Model.Work.WorkInvoice.Lines)
                         {
                             <tr>
                                 <td>@l.ID</td>

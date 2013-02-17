@@ -125,7 +125,7 @@ namespace obras_1213.Models
             }
         }
 
-        private Invoice WorkInvoice;
+        public Invoice WorkInvoice;
         public Invoice Invoice
         {
             get
@@ -157,6 +157,7 @@ namespace obras_1213.Models
             }
         }
 
+        public List<WorkAction> SerializedActions { get; set; }
         public IEnumerable<WorkAction> Actions
         {
             get
@@ -184,6 +185,7 @@ namespace obras_1213.Models
             }
         }
 
+        public List<WorkPart> SerializedParts { get; set; }
         public IEnumerable<WorkPart> Parts
         {
             get

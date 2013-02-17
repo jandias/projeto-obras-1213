@@ -18,6 +18,7 @@ namespace obras_1213.Models
         public int ShopID { get; set; }
         public int CustomerID { get; set; }
 
+        public Invoice() { }
         public Invoice(int id, DateTime date, string state, int discount, decimal total,
             int workId, int shopId, int customerId)
         {
