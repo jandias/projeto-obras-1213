@@ -45,5 +45,41 @@ namespace obras_1213.Models
                 throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
             }
         }
+
+        public static string FindAllAsXml()
+        {
+            try
+            {
+                using (SqlConnection conn = Db.Utils.NewConnection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(
+                        "WITH XMLNAMESPACES ('si2.isel.pt/2013/TrabFinal' as myns)" +
+                        "select codOfic as [@codOfic], " +
+                        "(select codDep as [@codDep]," +
+                        "  (select idCom as [@idCom], conteudoCom.query('" +
+                        "    myns:comunicado/*') from Comunicado where Comunicado.oficina = Oficina.codOfic AND Comunicado.departamento = Departamento.codDep" +
+                        "    for xml path ('myns:comunicado'), type) as [*]" +
+                        "  from Departamento where Departamento.oficina = Oficina.codOfic" +
+                        "  for xml path ('myns:departamento'), type) as [*]" +
+                        " from Oficina for xml path ('myns:oficina'), root('myns:comunicados')", conn))
+                    {
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if ( dr.Read())
+                            {
+                                return dr.GetString(0);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
+            }
+            return "";
+        }
+
     }
 }
