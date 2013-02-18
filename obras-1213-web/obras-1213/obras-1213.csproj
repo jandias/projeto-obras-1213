@@ -99,6 +99,7 @@
     <Compile Include="Auth\EmployeeRoles.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CarsController.cs" />
+    <Compile Include="Controllers\CommsController.cs" />
     <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -109,6 +110,8 @@
     </Compile>
     <Compile Include="Models\Action.cs" />
     <Compile Include="Models\Car.cs" />
+    <Compile Include="Models\Communication.cs" />
+    <Compile Include="Models\Department.cs" />
     <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\Db\Utils.cs" />
     <Compile Include="Models\Employee.cs" />
@@ -118,6 +121,7 @@
     <Compile Include="Models\Part.cs" />
     <Compile Include="Models\Shop.cs" />
     <Compile Include="Models\View\AllWorksViewModel.cs" />
+    <Compile Include="Models\View\CommsViewModel.cs" />
     <Compile Include="Models\View\LoginViewModel.cs" />
     <Compile Include="Models\View\NewWorkViewModel.cs" />
     <Compile Include="Models\View\WorkViewModel.cs" />
@@ -192,6 +196,9 @@
     <Content Include="Content\xslt\shops2table.xslt" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <None Include="Content\xml\comunicados.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery-1.7.1.min.js" />
@@ -204,6 +211,7 @@
     <Content Include="Scripts\Localization\messages_pt_PT.js" />
     <Content Include="Scripts\Localization\methods_pt.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
+    <Content Include="Scripts\Views\comms-index.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -237,6 +245,9 @@
     <Content Include="Views\Customer\Index.cshtml" />
     <Content Include="Views\Obras\DetailsOffline.cshtml" />
     <Content Include="Views\Shops\Index.cshtml" />
+    <Content Include="Views\Comms\Index.cshtml" />
+    <Content Include="Views\Comms\Add.cshtml" />
+    <Content Include="Views\Comms\_Departments.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,32 @@
+﻿@using obras_1213.Models
+@using obras_1213.Models.View
+@model CommsViewModel
+@{
+    ViewBag.Title = "Comunicados";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/Views/comms-index.js")" type="text/javascript"></script>
+}
+
+<h2>Comunicados</h2>
+
+<div class="container">
+    <div>
+        <br/>
+        <a class="btn" href="@Url.Action("Download")">Obter comunicados</a> - <a href="/xml/comunicados.xsd">obter xml schema</a>
+        <br/><br/><br/>
+    </div>
+    <div>
+        <form action="@Url.Action("Add")" method="post" enctype="multipart/form-data">
+            @Html.DropDownList("shopId", Model.ShopsToSelect)
+            @Html.DropDownList("departmentId", Model.DepartmentsToSelect)
+            <input style="display:inline;vertical-align:top;" type="file" class="input-block-level" name="CommFile">
+            <button class="btn btn-success" style="vertical-align:top;"><i class="icon-plus-sign"></i>Adicionar</button>
+        </form>
+    </div>
+    <div>
+        <a class="btn" href="@Url.Action("List")">Listar comunicados</a>
+    </div>
+</div>

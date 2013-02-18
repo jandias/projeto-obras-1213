@@ -1,6 +1,9 @@
 ﻿<!DOCTYPE html>
 <html>
+    <head>
     @Html.Partial("_Header")
+    @RenderSection("scripts", false)
+    </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -21,6 +24,7 @@
               <li><a href="/Employee">Funcionários</a></li>
               <li><a href="/Customer">Clientes</a></li>
               <li><a href="/Shops">Oficinas</a></li>
+              <li><a href="/Comms">Comunicados</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>

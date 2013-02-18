@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using obras_1213.Models;
+using obras_1213.Models.View;
+
+namespace obras_1213.Controllers
+{
+    public class CommsController : Controller
+    {
+        //
+        // GET: /Comms/
+
+        [HttpGet]
+        public ActionResult Index()
+        {
+            return View( new CommsViewModel());
+        }
+
+        [HttpPost]
+        public ActionResult Add(int shopId, int departmentId)
+        {
+            String msg = "";
+            if( shopId > 0 && departmentId > 0 && Request.Files["CommFile"] != null ) {
+                try {
+                    string xmlContent = new StreamReader( Request.Files["CommFile"].InputStream ).ReadToEnd();
+                    var comm = new Communication(departmentId, shopId, xmlContent);
+                    if( comm.Insert() )
+                        msg="Dados inseridos com sucesso.";
+                    else
+                        msg="Os dados não foram inseridos.";
+                }
+                catch (ModelException ex)
+                {
+                    msg="Os dados não foram inseridos: "+ex.Message;
+                }
+            }
+            else
+                msg = "Campos submetidos inválidos.";
+
+            TempData["report"] = msg;
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AjaxDepartments(int shopId) {
+            return PartialView("_Departments", CommsViewModel.GetDepartments(shopId) );
+        }
+        
+
+    }
+}

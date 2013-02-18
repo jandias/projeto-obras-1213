@@ -89,7 +89,7 @@ CREATE TABLE FuncionarioDepartamento(
 
 CREATE TABLE Comunicado(
 	idCom INT IDENTITY(1,1) PRIMARY KEY,
-	conteudoCom XML,
+	conteudoCom XML (ComunicadoSchemaCollection),
 	departamento INT NOT NULL,
 	oficina INT NOT NULL,
 	FOREIGN KEY (departamento,oficina) REFERENCES Departamento (codDep,oficina) ON DELETE CASCADE
