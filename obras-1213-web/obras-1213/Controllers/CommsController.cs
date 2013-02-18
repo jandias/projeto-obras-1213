@@ -49,6 +49,23 @@ namespace obras_1213.Controllers
         public ActionResult AjaxDepartments(int shopId) {
             return PartialView("_Departments", CommsViewModel.GetDepartments(shopId) );
         }
+
+        [HttpGet]
+        public ActionResult Download()
+        {
+            try
+            {
+                Response.ContentType = "text/xml; charset=utf-8";
+                Response.AddHeader("Content-Disposition", "attachment; filename=\"comunicados.xml\"");
+                return this.Content( Communication.FindAllAsXml(),
+                    "text/xml", System.Text.Encoding.UTF8);
+            }
+            catch (ModelException ex)
+            {
+                ModelState.AddModelError("", ex);
+                return Index();
+            }
+        }
         
 
     }

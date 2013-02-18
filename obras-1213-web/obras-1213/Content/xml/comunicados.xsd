@@ -50,8 +50,6 @@
     <xs:attribute name="codDep" type="xs:integer"/>
   </xs:complexType>
 
-  <!-- TODO: falta a constraint para a entrada em vigor ser por
-  defeito igual à data e só poder ser igual ou superior -->
   <xs:complexType name="dataType">
     <xs:simpleContent>
       <xs:extension base="xs:date">
