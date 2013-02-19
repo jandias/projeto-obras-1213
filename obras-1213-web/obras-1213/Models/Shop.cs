@@ -31,9 +31,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select " +
                         "	Oficina.codOfic, Oficina.faxOfic, Oficina.moradaOfic, Oficina.nifOfic, Oficina.nomeOfic, Oficina.telefoneOfic, " +
@@ -60,9 +59,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Shop> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select codOfic, nifOfic, nomeOfic, moradaOfic, telefoneOfic, faxOfic, responsavel " +
                     "from Oficina", conn))

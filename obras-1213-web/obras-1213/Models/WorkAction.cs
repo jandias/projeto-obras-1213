@@ -60,9 +60,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "UPDATE ObraContem SET horasRealizadas = @horas " +
                         "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",
@@ -94,9 +93,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("REPEATABLE READ"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("RetiraActoObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -119,9 +117,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "UPDATE ObraContem SET estaConcluido = @concluido " +
                         "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",

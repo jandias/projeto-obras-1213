@@ -29,9 +29,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select marca, modelo, nomeProprietario " +
                         "from Veiculo where matricula = @license", conn))
@@ -56,9 +55,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Car> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select marca, modelo, nomeProprietario, matricula " +
                     "from Veiculo", conn))

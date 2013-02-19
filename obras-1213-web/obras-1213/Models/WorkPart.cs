@@ -30,9 +30,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("READ COMMITTED"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("RetiraPecaObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -42,7 +41,11 @@ namespace obras_1213.Models
                         cmd.Parameters.AddWithValue("@oficina", parentWork.ShopID).Direction = ParameterDirection.Input;
                         cmd.Parameters.AddWithValue("@obra", parentWork.ID).Direction = ParameterDirection.Input;
                         cmd.ExecuteNonQuery();
-                        return (int)retVal.Value == 0;
+                        if ((int)retVal.Value == 0)
+                        {
+                            return true;
+                        }
+                        return false;
                     }
                 }
             }

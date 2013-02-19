@@ -42,9 +42,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "update Cliente set " + 
                         "nifCli=@nif, nomeCli=@nome, moradaCli=@morada, telefoneCli=@telefone, emailCli=@email, tipoCli=@tipo " +
@@ -71,9 +70,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "INSERT INTO Cliente (nifCli, nomeCli, moradaCli, telefoneCli, emailCli, tipoCli) " +
                         "VALUES (@nif, @nome, @morada, @telefone, @email, @tipo) ", conn))
@@ -98,9 +96,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select nifCli, nomeCli, moradaCli, telefoneCli, emailCli, tipoCli " +
                         "from Cliente where numCli = @id", conn))
@@ -126,9 +123,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Customer> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select nifCli, nomeCli, moradaCli, telefoneCli, emailCli, tipoCli, numCli " +
                     "from Cliente", conn))

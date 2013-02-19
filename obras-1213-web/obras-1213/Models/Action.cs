@@ -59,9 +59,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select departamento, oficina, designacaoA, horasEstimadas " +
                         "from Acto where idA = @id", conn))
@@ -87,9 +86,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Action> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select departamento, oficina, designacaoA, horasEstimadas, idA " +
                     "from Acto", conn))

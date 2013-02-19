@@ -28,9 +28,8 @@ namespace obras_1213.Models
                 }
                 try
                 {
-                    using (SqlConnection conn = Db.Utils.NewConnection)
+                    using (SqlConnection conn = Db.Utils.NewConnection())
                     {
-                        conn.Open();
                         using (SqlCommand cmd = new SqlCommand(
                             "select designacaoProf from Profissao where idProf = @prof", conn))
                         {
@@ -73,9 +72,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select nifFunc, nomeFunc, telefoneFunc, emailFunc, estadoFunc, profissao " +
                         "from Funcionario where codFunc = @EmployeeNumber", conn))
@@ -101,9 +99,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Employee> AllEmployees()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select codFunc, nifFunc, nomeFunc, telefoneFunc, emailFunc, estadoFunc, profissao " +
                     "from Funcionario", conn))

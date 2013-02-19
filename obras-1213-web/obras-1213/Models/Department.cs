@@ -21,9 +21,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Department> FindAll( int shopId )
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select codDep, nomeDep " +
                     "from Departamento " +

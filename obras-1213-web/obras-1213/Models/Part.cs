@@ -29,9 +29,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select designacaoP, precoP " +
                         "from Peca where refP = @id", conn))
@@ -56,9 +55,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Part> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select designacaoP, precoP, refP " +
                     "from Peca", conn))

@@ -47,9 +47,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "INSERT INTO Comunicado (departamento, oficina, conteudoCom) " +
                         "VALUES (@dep, @shop, @contents) ", conn))
@@ -71,9 +70,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "WITH XMLNAMESPACES ('si2.isel.pt/2013/TrabFinal' as myns)" +
                         "select codOfic as [@codOfic], " +
@@ -104,9 +102,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Communication> List(DateTime publishDate)
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "with xmlnamespaces ('si2.isel.pt/2013/TrabFinal' as myns) " +
                     "select  " +

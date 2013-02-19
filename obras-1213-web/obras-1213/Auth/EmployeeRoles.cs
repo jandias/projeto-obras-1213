@@ -82,9 +82,8 @@ namespace obras_1213.Auth
                 {
                     return false;
                 }
-                using (SqlConnection conn = Utils.NewConnection)
+                using (SqlConnection conn = Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("FuncionarioRecepcionista", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;

@@ -65,9 +65,8 @@ namespace obras_1213.Models
                 {
                     try
                     {
-                        using (SqlConnection conn = Db.Utils.NewConnection)
+                        using (SqlConnection conn = Db.Utils.NewConnection())
                         {
-                            conn.Open();
                             using (SqlCommand cmd = new SqlCommand(
                                 "UPDATE Obra SET estadoO = @estado WHERE codO=@obra AND oficina=@oficina",
                                 conn))
@@ -78,13 +77,6 @@ namespace obras_1213.Models
                                 if (cmd.ExecuteNonQuery() > 0)
                                 {
                                     state = value;
-                                    if (state.Equals("facturada"))
-                                    {
-
-                                    }
-                                    else if (state.Equals("paga"))
-                                    {
-                                    }
                                 }
                                 else
                                 {
@@ -162,9 +154,8 @@ namespace obras_1213.Models
         {
             get
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select oc.acto, oc.departamento, oc.funcionario, oc.horasRealizadas, oc.estaConcluido, " +
 	                    " a.oficina, a.designacaoA, a.horasEstimadas from ObraContem oc " +
@@ -190,9 +181,8 @@ namespace obras_1213.Models
         {
             get
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select p.refP, p.designacaoP, p.precoP, r.quantP from Reserva r " +
                         " join Peca p on r.peca=p.refP " +
@@ -215,9 +205,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("READ COMMITTED"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("AdicionaPecaObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -242,9 +231,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo " +
                         "from Obra where codO = @id", conn))
@@ -270,9 +258,8 @@ namespace obras_1213.Models
 
         public static IEnumerable<Work> FindAll()
         {
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "select oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo, codO " +
                     "from Obra", conn))
@@ -295,9 +282,8 @@ namespace obras_1213.Models
                     "select oficina, dataRegistoO, estadoO, valorEstimado, totalHorasEstimado, veiculo, codO " +
                     "from Obra where estadoO " + (open ? "" : "not") + " in ('marcada', 'em realização', 'espera peças') " +
                     " and dataRegistoO >= @data ";
-            using (SqlConnection conn = Db.Utils.NewConnection)
+            using (SqlConnection conn = Db.Utils.NewConnection())
             {
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@data", since);
@@ -352,9 +338,8 @@ namespace obras_1213.Models
                 sw.Close();
                 axml = sw.ToString();
 
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("SERIALIZABLE"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("RegistarObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -408,9 +393,8 @@ namespace obras_1213.Models
             try
             {
                 Action a = Action.Find(actionId);
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("SERIALIZABLE"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("AdicionaActoObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -463,9 +447,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection("SERIALIZABLE"))
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("FacturarObra", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;

@@ -10,39 +10,21 @@ namespace obras_1213.Models.Db
 {
     public class Utils
     {
-        public static SqlConnection NewConnection
+        public static SqlConnection NewConnection(string isolationLevel)
         {
-            get 
-            { 
-                return new SqlConnection(ConfigurationManager.ConnectionStrings["ObrasDb"].ConnectionString); 
+            SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["ObrasDb"].ConnectionString);
+            conn.Open();
+            // Assegurar um nível de isolamento por omissão para todas as instruções.
+            using (SqlCommand cmd = new SqlCommand("SET TRANSACTION ISOLATION LEVEL " + isolationLevel, conn))
+            {
+                cmd.ExecuteNonQuery();
             }
+            return conn;
         }
 
-        public static DataTable GetData(SqlCommand cmd)
+        public static SqlConnection NewConnection()
         {
-            DataTable dt = new DataTable();
-            using (cmd)
-            {
-                cmd.CommandType = CommandType.Text;
-                using (SqlDataAdapter sda = new SqlDataAdapter())
-                {
-                    sda.SelectCommand = cmd;
-                    sda.Fill(dt);
-                }
-            }
-            return dt;
-        }
-
-        public static SqlDataReader GetReader(string command)
-        {
-            using (SqlConnection conn = NewConnection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand(command, conn))
-                {
-                    return cmd.ExecuteReader();
-                }
-            }
+            return NewConnection("READ COMMITTED");
         }
     }
 }

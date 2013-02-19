@@ -56,21 +56,27 @@ namespace obras_1213.Models
             {
                 if (!State.Equals("paga") && value == true)
                 {
-                    using (SqlConnection conn = Db.Utils.NewConnection)
+                    try
                     {
-                        conn.Open();
-                        using (SqlCommand cmd = new SqlCommand("PagarFactura", conn))
+                        using (SqlConnection conn = Db.Utils.NewConnection("REPEATABLE READ"))
                         {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
-                            retVal.Direction = ParameterDirection.ReturnValue;
-                            cmd.Parameters.AddWithValue("@factura", ID).Direction = ParameterDirection.Input;
-                            cmd.ExecuteNonQuery();
-                            if ((int)retVal.Value == 0)
+                            using (SqlCommand cmd = new SqlCommand("PagarFactura", conn))
                             {
-                                State = "paga";
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                SqlParameter retVal = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                                retVal.Direction = ParameterDirection.ReturnValue;
+                                cmd.Parameters.AddWithValue("@factura", ID).Direction = ParameterDirection.Input;
+                                cmd.ExecuteNonQuery();
+                                if ((int)retVal.Value == 0)
+                                {
+                                    State = "paga";
+                                }
                             }
                         }
+                    }
+                    catch (SqlException e)
+                    {
+                        throw new ModelException("Erro na base de dados: " + e.Message, e);
                     }
                 }
             }
@@ -80,9 +86,8 @@ namespace obras_1213.Models
         {
             get
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select nLinha, descricaoLinha, precoUnit, quant, totalLinha " +
                         " from LinhaFactura " +
@@ -106,9 +111,8 @@ namespace obras_1213.Models
         {
             try
             {
-                using (SqlConnection conn = Db.Utils.NewConnection)
+                using (SqlConnection conn = Db.Utils.NewConnection())
                 {
-                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand(
                         "select numFact, dataFact, estadoFact, desconto, totalFactura, cliente " +
                         "from Factura where obra = @obra and oficina = @oficina", conn))
