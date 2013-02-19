@@ -29,12 +29,25 @@ N'<?xml version="1.0"?>
  elementFormDefault="qualified" attributeFormDefault="unqualified">
   <xs:element name="comunicado">
     <xs:complexType>
-      <xs:all>
-        <xs:element name="tipo" type="myns:tipoType" minOccurs="1"/>
-        <xs:element name="autor" type="xs:string" minOccurs="1"/>
-        <xs:element name="data" type="myns:dataType" minOccurs="1"/>
-        <xs:element name="conteudo" type="xs:string" minOccurs="1"/>
-      </xs:all>
+      <xs:sequence>
+        <xs:element name="tipo" type="myns:tipoType" minOccurs="1" maxOccurs="1" />
+        <xs:element name="autor" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="data" type="myns:dataType" minOccurs="1" maxOccurs="1"/>
+        <xs:choice>
+          <xs:sequence>
+            <xs:element name="conteudo" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="urlPrint" type="xs:anyURI" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="urlMedia" type="xs:anyURI" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element name="urlPrint" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="urlMedia" type="xs:anyURI" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element name="urlMedia" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+          </xs:sequence>
+        </xs:choice>
+      </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:complexType name="dataType">
