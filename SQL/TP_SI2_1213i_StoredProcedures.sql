@@ -5,6 +5,7 @@ DROP VIEW ObrasNaoTerminadas
 
 DROP FUNCTION EscolheFuncionario
 
+
 DROP PROCEDURE FuncionarioRecepcionista
 DROP PROCEDURE RetiraPecaObra
 DROP PROCEDURE AdicionaPecaObra
@@ -20,8 +21,11 @@ DROP PROCEDURE RegistarObra
 DROP PROCEDURE TerminarObra
 DROP PROCEDURE AtribuiActoFuncionario
 DROP PROCEDURE PagarFactura
+
 DROP PROCEDURE FacturarObra
+
 DROP PROCEDURE RelatorioAnual
+
 
 DROP TRIGGER ConclusaoAutomaticaObra
 DROP TRIGGER RegistaHistoricoPeca 
@@ -321,7 +325,7 @@ AS BEGIN
 			ROLLBACK
 			RETURN -2 /* referência de obra ou de oficina inválida */
 		END
-		UPDATE Obra SET estadoO = 'concluída'
+		UPDATE Obra SET estadoO = 'concluída' WHERE codO=@obra AND oficina=@oficina
 	COMMIT
 END
 GO
@@ -363,139 +367,273 @@ GO
 /* i. Facturar uma Obra e fazer o respectivo pagamento. */
 
 CREATE PROCEDURE FacturarObra(@obra INT, @oficina INT, @cliente INT)
+
 AS BEGIN
+
 	BEGIN TRANSACTION
+
 		IF ((NOT EXISTS (SELECT codO FROM Obra WHERE codO=@obra AND oficina=@oficina)) OR 
+
 			(NOT EXISTS (SELECT numCli FROM Cliente WHERE numCli=@cliente))) BEGIN
+
 			ROLLBACK
+
 			RETURN -2 /* referência de obra ou de cliente inválida */
+
 		END
+
 		IF (EXISTS (SELECT codO FROM Obra WHERE codO=@obra AND oficina=@oficina AND estadoO IN ('facturada', 'paga'))) BEGIN
+
 			ROLLBACK
+
 			RETURN -3 /* obra já facturada */
+
 		END
+
 		
+
 		DECLARE @desconto REAL, @totalHoras REAL, @valorTotal MONEY, @numLinha INT
+
 		SET @desconto = 0
+
 		SET @totalHoras = 0
+
 		SET @valorTotal = 0
+
 		SET @numLinha = 1
+
 		
+
 		DECLARE @idFactura INT
+
 		INSERT INTO Factura (dataFact, estadoFact, desconto, totalFactura, obra, oficina, cliente)
+
 			VALUES (GETDATE(), 'emitida', 0, 0, @obra, @oficina, @cliente)
+
 		SET @idFactura = SCOPE_IDENTITY()
+
 		
+
 		/* inserir mão de obra */
+
 		DECLARE @designacao VARCHAR(MAX), @horas REAL
+
 		DECLARE actosCur CURSOR FOR 
+
 			SELECT a.designacaoA, oc.horasRealizadas FROM ObraContem oc
+
 				JOIN Acto a ON a.idA=oc.acto AND a.departamento=oc.departamento AND a.oficina=oc.oficina
+
 				WHERE oc.obra=@obra AND oc.oficina=@oficina
+
 		OPEN actosCur
+
 		FETCH NEXT FROM actosCur INTO @designacao, @horas
+
 		WHILE (@@FETCH_STATUS=0) BEGIN
+
 			SET @totalHoras = @totalHoras + @horas
+
 			SET @valorTotal = @valorTotal + (30 * @horas)
+
 			INSERT INTO LinhaFactura (nLinha, factura, descricaoLinha, precoUnit, quant, totalLinha)
+
 				VALUES (@numLinha, @idFactura, @designacao, 30, @horas, 30 * @horas)
+
 			SET @numLinha = @numLinha + 1 
+
 			FETCH NEXT FROM actosCur INTO @designacao, @horas
+
 		END
+
 		CLOSE actosCur
+
 		DEALLOCATE actosCur
+
 		
+
 		/* inserir peças */
+
 		DECLARE @quantidade INT, @preco MONEY
+
 		DECLARE pecasCur CURSOR FOR
+
 			SELECT r.quantP, p.designacaoP, p.precoP FROM Reserva r
+
 				JOIN Peca p ON r.peca=p.refP
+
 				WHERE r.obra=@obra AND r.oficina=@oficina
+
 		OPEN pecasCur
+
 		FETCH NEXT FROM pecasCur INTO @quantidade, @designacao, @preco
+
 		WHILE (@@FETCH_STATUS=0) BEGIN
+
 			SET @valorTotal = @valorTotal + (@quantidade * @preco)
+
 			INSERT INTO LinhaFactura (nLinha, factura, descricaoLinha, precoUnit, quant, totalLinha)
+
 				VALUES (@numLinha, @idFactura, @designacao, @preco, @quantidade, @quantidade * @preco)
+
 			SET @numLinha = @numLinha + 1 
+
 			FETCH NEXT FROM pecasCur INTO @quantidade, @designacao, @preco
+
 		END
+
 		
+
 		/* calcular desconto */
+
 		DECLARE @numObras INT
+
 		SELECT @numObras=COUNT(*) FROM Obra o 
+
 			JOIN Factura f ON f.obra=o.codO AND f.oficina = o.oficina AND f.cliente=@cliente
+
 			WHERE o.dataRegistoO >= DATEADD(month, -1, GETDATE()) AND
+
 				  o.codO=@obra AND o.oficina=@oficina
+
 		IF (@numObras>10)
+
 			SET @desconto=0.1
+
 		ELSE IF (@numObras>5)
+
 			SET @desconto=0.05
+
 		
+
 		UPDATE Factura SET desconto=@desconto*100, totalFactura=@valorTotal-(@valorTotal*@desconto)
+
 			WHERE numFact=@idFactura
 
+
+
 		UPDATE Obra SET estadoO='facturada' 
+
 			WHERE codO=@obra AND oficina=@oficina
+
 	COMMIT
+
 END
+
 GO
+
+
 
 CREATE PROCEDURE PagarFactura(@factura INT)
+
 AS BEGIN
+
 	BEGIN TRANSACTION
+
 		DECLARE @obra INT, @oficina INT, @estado VARCHAR(MAX)
+
 		SELECT @obra=obra, @oficina=oficina, @estado=estadoFact FROM Factura WHERE numFact=@factura
+
 		IF (@obra IS NULL OR @oficina IS NULL) BEGIN
+
 			ROLLBACK
+
 			RETURN -2 /* referência de factura inválida */
+
 		END
+
 		IF (@estado='paga') BEGIN
+
 			ROLLBACK
+
 			RETURN -3 /* factura já paga */
+
 		END
+
+
 
 		UPDATE Factura SET estadoFact='paga' WHERE numFact=@factura
+
 		UPDATE Obra SET estadoO='paga' WHERE codO=@obra AND oficina=@oficina
+
 	COMMIT
+
 END
+
 GO
+
+
 
 /* c. Afectar um funcionário a um Departamento, no contexto de um Acto. */
+
 CREATE PROCEDURE AtribuiActoFuncionario(@acto INT, @departamento INT, @oficina INT, @funcionario INT)
+
 AS BEGIN
+
 	BEGIN TRANSACTION
+
 		IF (NOT EXISTS (SELECT funcionario FROM Habilitado 
+
 			WHERE funcionario=@funcionario AND acto=@acto AND departamento=@departamento AND oficina=@oficina)) BEGIN
+
 			INSERT INTO Habilitado (funcionario, acto, departamento, oficina)
+
 				VALUES (@funcionario, @acto, @departamento, @oficina)
+
 			IF (@@ROWCOUNT=0) BEGIN
+
 				ROLLBACK
+
 				RETURN -2 /* pelo menos uma referência é inválida */
+
 			END
+
 		END
+
 		IF (NOT EXISTS (SELECT funcionario FROM FuncionarioDepartamento WHERE funcionario=@funcionario)) BEGIN
+
 			INSERT INTO FuncionarioDepartamento (departamento, oficina, funcionario)
+
 				VALUES (@departamento, @oficina, @funcionario) 
+
 			IF (@@ROWCOUNT=0) BEGIN
+
 				ROLLBACK
+
 				RETURN -3 /* ou pelo menos uma referência é inválida ou o funcionário não pode estar neste departamento */
+
 			END
+
 		END
+
 	COMMIT
+
 END
+
 GO
 
+
+
 CREATE PROCEDURE FuncionarioRecepcionista(@funcionario INT, @recepcionista INT OUTPUT)
+
 AS BEGIN
+
 	IF (EXISTS (SELECT fd.departamento FROM FuncionarioDepartamento fd
+
 			JOIN Departamento d ON fd.departamento=d.codDep
+
 			WHERE nomeDep='Recepção' AND fd.funcionario=@funcionario))
+
 		SET @recepcionista=1
+
 	ELSE
+
 		SET @recepcionista=0
+
 END
+
 GO
+
 
 CREATE PROCEDURE AdicionaActoObra(@obra INT, @oficina INT, @acto INT, @departamento INT, @funcionario INT)
 AS BEGIN
@@ -508,6 +646,7 @@ AS BEGIN
 			RETURN @ret
 		END
 		INSERT INTO ObraContem (obra, oficina, acto, departamento, funcionario, horasRealizadas, estaConcluido) 
+
 			VALUES (@obra, @oficina, @acto, @departamento, @funcionario, 0, 0)
 		IF (@@ROWCOUNT = 0) BEGIN
 			ROLLBACK
@@ -532,6 +671,7 @@ AS BEGIN
 		DECLARE @horas REAL
 		SELECT @horas=horasEstimadas FROM Acto WHERE idA=@acto AND departamento=@departamento AND oficina=@oficina
 		DELETE FROM ObraContem WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento
+
 		UPDATE Obra 
 			SET totalHorasEstimado = totalHorasEstimado - @horas,
 				valorEstimado = valorEstimado - @horas * 30
