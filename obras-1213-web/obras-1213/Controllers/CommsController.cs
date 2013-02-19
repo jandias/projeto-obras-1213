@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Xsl;
 using obras_1213.Models;
 using obras_1213.Models.View;
 
@@ -83,6 +85,26 @@ namespace obras_1213.Controllers
         public ActionResult List(DateTime date)
         {
             return View(Communication.List(date));
+        }
+
+        [HttpGet]
+        public ActionResult ListAll()
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringReader sr = new StringReader(Communication.FindAllAsXml()))
+            {
+                using (XmlReader xread = XmlReader.Create(sr))
+                {
+                    using (StringWriter sw = new StringWriter(sb))
+                    {
+                        XslCompiledTransform transf = new XslCompiledTransform();
+                        transf.Load(Server.MapPath("~/Content/xslt/comms2table.xslt"));
+                        transf.Transform(xread, null, sw);
+                    }
+                }
+            }
+            ViewBag.CommsHtml = sb.ToString();
+            return View();
         }
     }
 }
