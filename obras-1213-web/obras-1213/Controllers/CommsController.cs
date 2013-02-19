@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml;
+using System.Xml.Schema;
 using obras_1213.Models;
 using obras_1213.Models.View;
 
@@ -58,14 +60,23 @@ namespace obras_1213.Controllers
             {
                 Response.ContentType = "text/xml; charset=utf-8";
                 Response.AddHeader("Content-Disposition", "attachment; filename=\"comunicados.xml\"");
-                return this.Content( Communication.FindAllAsXml(),
-                    "text/xml", System.Text.Encoding.UTF8);
+                string xmlText = Communication.FindAllAsXml();
+                ValidateXml(xmlText);
+                return this.Content(xmlText, "text/xml", System.Text.Encoding.UTF8);
             }
-            catch (ModelException ex)
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", ex);
-                return Index();
+                return RedirectToAction("Index");
             }
+        }
+
+        private void ValidateXml(string xmlText) {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xmlText);
+            document.Schemas.Add( null, Server.MapPath(Url.Content("~/Content/xml/comunicados.xsd")) );
+            // Validation errors thrown as exceptions. Callback used for error details
+            document.Validate((sender, e) => {});
         }
 
         [HttpPost]
