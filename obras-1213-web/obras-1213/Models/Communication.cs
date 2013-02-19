@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace obras_1213.Models
@@ -87,10 +88,13 @@ namespace obras_1213.Models
                     {
                         using (SqlDataReader dr = cmd.ExecuteReader())
                         {
-                            if ( dr.Read())
+                            // row cells are limited to 2033 bytes
+                            var xmlString = new StringBuilder();
+                            while ( dr.Read() )
                             {
-                                return dr.GetString(0);
+                                xmlString.Append( dr.GetString(0) );
                             }
+                            return xmlString.ToString();
                         }
                     }
                 }
