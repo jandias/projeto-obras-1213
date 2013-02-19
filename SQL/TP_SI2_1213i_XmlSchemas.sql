@@ -30,9 +30,9 @@ N'<?xml version="1.0"?>
   <xs:element name="comunicado">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="tipo" type="myns:tipoType" minOccurs="1"/>
-        <xs:element name="autor" type="xs:string" minOccurs="1"/>
-        <xs:element name="data" type="myns:dataType" minOccurs="1"/>
+        <xs:element name="tipo" type="myns:tipoType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="autor" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="data" type="myns:dataType" minOccurs="1" maxOccurs="1"/>
         <xs:choice>
           <xs:sequence>
             <xs:element name="conteudo" type="xs:string" minOccurs="1" maxOccurs="1"/>

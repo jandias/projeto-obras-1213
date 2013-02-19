@@ -2,6 +2,8 @@
 <myns:comunicado xmlns:myns="si2.isel.pt/2013/TrabFinal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <myns:tipo>anúncio</myns:tipo>
   <myns:autor>Maria Silvina</myns:autor>
-  <myns:data entrada-em-vigor="2011-12-20">2012-12-20</myns:data>
-  <myns:conteudo>Bom natal para todos os colegas.</myns:conteudo>
+  <myns:data>2012-12-20</myns:data>
+  <myns:conteudo>Carissimos, serve o presente para informar que a adesão à greve é obrigatória.
+    Aproveito para desejar um Bom natal a todos.</myns:conteudo>
+  <myns:urlMedia>http://media.pt</myns:urlMedia>
 </myns:comunicado>

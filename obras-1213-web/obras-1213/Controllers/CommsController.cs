@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Xsl;
 using obras_1213.Models;
 using obras_1213.Models.View;
 using System.Xml.Schema;
@@ -104,20 +108,49 @@ namespace obras_1213.Controllers
             {
                 Response.ContentType = "text/xml; charset=utf-8";
                 Response.AddHeader("Content-Disposition", "attachment; filename=\"comunicados.xml\"");
-                return this.Content( Communication.FindAllAsXml(),
-                    "text/xml", System.Text.Encoding.UTF8);
+                string xmlText = Communication.FindAllAsXml();
+                ValidateXml(xmlText);
+                return this.Content(xmlText, "text/xml", System.Text.Encoding.UTF8);
             }
-            catch (ModelException ex)
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", ex);
-                return Index();
+                return RedirectToAction("Index");
             }
+        }
+
+        private void ValidateXml(string xmlText) {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xmlText);
+            document.Schemas.Add( null, Server.MapPath(Url.Content("~/Content/xml/comunicados.xsd")) );
+            // Validation errors thrown as exceptions. Callback used for error details
+            document.Validate((sender, e) => {});
         }
 
         [HttpPost]
         public ActionResult List(DateTime date)
         {
             return View(Communication.List(date));
+        }
+
+        [HttpGet]
+        public ActionResult ListAll()
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringReader sr = new StringReader(Communication.FindAllAsXml()))
+            {
+                using (XmlReader xread = XmlReader.Create(sr))
+                {
+                    using (StringWriter sw = new StringWriter(sb))
+                    {
+                        XslCompiledTransform transf = new XslCompiledTransform();
+                        transf.Load(Server.MapPath("~/Content/xslt/comms2table.xslt"));
+                        transf.Transform(xread, null, sw);
+                    }
+                }
+            }
+            ViewBag.CommsHtml = sb.ToString();
+            return View();
         }
     }
 }

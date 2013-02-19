@@ -9,13 +9,8 @@
         <xs:element name="oficina" minOccurs="0" maxOccurs="unbounded" >
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="departamento" type="myns:departamentoType" minOccurs="0" maxOccurs="unbounded">
-                <xs:key name="comunicadoKey">
-                  <xs:selector xpath="myns:comunicado"/>
-                  <xs:field xpath="@idCom"/>
-                </xs:key>
-              </xs:element>
-              </xs:sequence>
+              <xs:element name="departamento" type="myns:departamentoType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
             <xs:attribute name="codOfic" type="xs:integer"/>
           </xs:complexType>
           <xs:key name="departamentoKey">
@@ -25,11 +20,15 @@
         </xs:element>
       </xs:sequence>
     </xs:complexType>
+
     <xs:key name="oficinaKey">
       <xs:selector xpath="myns:oficina"/>
       <xs:field xpath="@codOfic"/>
     </xs:key>
-
+    <xs:key name="comunicadoKey">
+      <xs:selector xpath="myns:oficina/myns:departamento/myns:comunicado"/>
+      <xs:field xpath="@idCom"/>
+    </xs:key>
 
   </xs:element>
 
@@ -38,9 +37,9 @@
       <xs:element name="comunicado" minOccurs="0" maxOccurs="unbounded">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="tipo" type="myns:tipoType" minOccurs="1"/>
-            <xs:element name="autor" type="xs:string" minOccurs="1"/>
-            <xs:element name="data" type="myns:dataType" minOccurs="1"/>
+            <xs:element name="tipo" type="myns:tipoType" minOccurs="1" maxOccurs="1" />
+            <xs:element name="autor" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="data" type="myns:dataType" minOccurs="1" maxOccurs="1"/>
             <xs:choice>
               <xs:sequence>
                 <xs:element name="conteudo" type="xs:string" minOccurs="1" maxOccurs="1"/>

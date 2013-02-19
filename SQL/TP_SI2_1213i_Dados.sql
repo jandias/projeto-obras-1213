@@ -11,6 +11,7 @@ DELETE FROM Profissao
 DELETE FROM Obra
 DELETE FROM Veiculo
 DELETE FROM Oficina
+DELETE FROM Comunicado
 GO
 
 INSERT INTO Peca (refP, designacaoP, precoP)
