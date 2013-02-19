@@ -85,10 +85,12 @@ namespace obras_1213.Models
                     {
                         using (SqlDataReader dr = cmd.ExecuteReader())
                         {
-                            if ( dr.Read())
+                            string str = "";
+                            while (dr.Read())
                             {
-                                return dr.GetString(0);
+                                str += (string)dr.GetValue(0);
                             }
+                            return str;
                         }
                     }
                 }
@@ -97,7 +99,6 @@ namespace obras_1213.Models
             {
                 throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
             }
-            return "";
         }
 
         public static IEnumerable<Communication> List(DateTime publishDate)
