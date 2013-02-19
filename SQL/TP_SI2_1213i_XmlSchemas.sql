@@ -53,7 +53,7 @@ N'<?xml version="1.0"?>
   <xs:complexType name="dataType">
     <xs:simpleContent>
       <xs:extension base="xs:date">
-        <xs:attribute name="entrada-em-vigor" type="xs:date" default="2014-01-10" />
+        <xs:attribute name="entrada-em-vigor" type="xs:date" />
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>

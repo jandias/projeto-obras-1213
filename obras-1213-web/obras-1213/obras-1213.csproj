@@ -196,6 +196,9 @@
     <Content Include="Content\xslt\shops2table.xslt" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <None Include="Content\xml\comunicado.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Content\xml\comunicados.xsd">
       <SubType>Designer</SubType>
     </None>

@@ -6,6 +6,9 @@ using System.Web;
 using System.Web.Mvc;
 using obras_1213.Models;
 using obras_1213.Models.View;
+using System.Xml.Schema;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace obras_1213.Controllers
 {
@@ -27,12 +30,55 @@ namespace obras_1213.Controllers
             String msg = "";
             if( shopId > 0 && departmentId > 0 && Request.Files["CommFile"] != null ) {
                 try {
-                    string xmlContent = new StreamReader( Request.Files["CommFile"].InputStream ).ReadToEnd();
-                    var comm = new Communication(departmentId, shopId, xmlContent);
-                    if( comm.Insert() )
-                        msg="Dados inseridos com sucesso.";
+                    string errors = "";
+                    XmlSchemaSet xsds = new XmlSchemaSet();
+                    xsds.Add("si2.isel.pt/2013/TrabFinal", Server.MapPath("~/Content/xml/comunicado.xsd"));
+                    XDocument xdoc = XDocument.Load(new StreamReader( Request.Files["CommFile"].InputStream ));
+                    xdoc.Validate(xsds, (o, e) =>
+                    {
+                        errors += "Erro de validação do documento XML: " + e.Message;
+                    });
+                    if (errors.Length == 0)
+                    {
+                        XNamespace myns = "si2.isel.pt/2013/TrabFinal";
+                        XElement docDate = xdoc.Root.Element(myns + "data");
+                        if (docDate != null)
+                        {
+                            XAttribute attr = docDate.Attribute("entrada-em-vigor");
+                            if (attr != null)
+                            {
+                                try
+                                {
+                                    DateTime dd = DateTime.Parse(docDate.Value);
+                                    DateTime vd = DateTime.Parse(attr.Value);
+                                    if (vd < dd)
+                                    {
+                                        errors += " A data de entrada em vigor é inferior à data de emissão.";
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    errors += "Erro na validação do formato das datas: " + e.Message;
+                                }
+                            }
+                            else
+                            {
+                                docDate.Add(new XAttribute("entrada-em-vigor", docDate.Value));
+                            }
+                        }
+                    }
+                    if (errors.Length == 0)
+                    {
+                        var comm = new Communication(departmentId, shopId, xdoc.ToString(SaveOptions.OmitDuplicateNamespaces));
+                        if (comm.Insert())
+                            msg = "Dados inseridos com sucesso.";
+                        else
+                            msg = "Os dados não foram inseridos.";
+                    }
                     else
-                        msg="Os dados não foram inseridos.";
+                    {
+                        msg = "Os dados não foram inseridos: " + errors;
+                    }
                 }
                 catch (ModelException ex)
                 {
