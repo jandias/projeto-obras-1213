@@ -10,8 +10,6 @@ using System.Xml.Schema;
 using System.Xml.Xsl;
 using obras_1213.Models;
 using obras_1213.Models.View;
-using System.Xml.Schema;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace obras_1213.Controllers
