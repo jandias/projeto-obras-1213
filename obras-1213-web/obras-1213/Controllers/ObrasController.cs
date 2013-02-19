@@ -163,7 +163,7 @@ namespace obras_1213.Controllers
                     WorkAction wa = Work.Find(id).Actions.First(a => a.ID == actionId);
                     if (wa.CurrentUserCanComplete)
                     {
-                        wa.Completed = true;
+                        wa.Complete();
                         return RedirectToAction("Details", new { id = id });
                     }
                     else
@@ -189,7 +189,9 @@ namespace obras_1213.Controllers
                     float actualTime;
                     if (time != null && float.TryParse(time, out actualTime))
                     {
-                        Work.Find(id).Actions.First(a => a.ID == actionId).TimeWorked = actualTime;
+                        WorkAction action = Work.Find(id).Actions.First(a => a.ID == actionId);
+                        action.TimeWorked = actualTime;
+                        action.CommitTime();
                         return RedirectToAction("Details", new { id = id });
                     }
                     ModelState.AddModelError("", "O número de horas não está num formato correcto.");

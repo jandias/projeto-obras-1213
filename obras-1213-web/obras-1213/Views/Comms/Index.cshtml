@@ -14,19 +14,30 @@
 
 <div class="container">
     <div>
+        <h3>Obtenção de comunicados</h3>
+        <a class="btn" href="@Url.Action("Download")">Obter comunicados</a>
+        <br/><br/>
+        <a href="@Url.Content("~/Content/xml/comunicados.xsd")" class="btn">Obter XML Schema</a>
         <br/>
-        <a class="btn" href="@Url.Action("Download")">Obter comunicados</a> - <a href="@Url.Content("~/Content/xml/comunicados.xsd")">obter xml schema</a>
-        <br/><br/><br/>
     </div>
     <div>
+        <h3>Inserção de um comunicado</h3>
         <form action="@Url.Action("Add")" method="post" enctype="multipart/form-data">
             @Html.DropDownList("shopId", Model.ShopsToSelect)
+            <br />
             @Html.DropDownList("departmentId", Model.DepartmentsToSelect)
-            <input style="display:inline;vertical-align:top;" type="file" class="input-block-level" name="CommFile">
+            <br />
+            Ficheiro XML: <input style="display:inline;vertical-align:top;" type="file" class="input-block-level" name="CommFile">
+            <br />
             <button class="btn btn-success" style="vertical-align:top;"><i class="icon-plus-sign"></i>Adicionar</button>
         </form>
     </div>
     <div>
-        <a class="btn" href="@Url.Action("List")">Listar comunicados</a>
+        <h3>Listagem de comunicados</h3>
+        <form action="@Url.Action("List")" class="form-inline" method="post">
+            <label for="date">Data de publicação: </label>
+            <input type="text" class="date" name="date" />
+            <button type="submit" class="btn">Listar</button>
+        </form>
     </div>
 </div>

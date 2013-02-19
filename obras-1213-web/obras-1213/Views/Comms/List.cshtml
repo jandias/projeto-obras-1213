@@ -1,0 +1,38 @@
+﻿@using obras_1213.Models;
+@model IEnumerable<Communication>
+
+@{
+    ViewBag.Title = "Lista de comunicados";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Comunicados</h2>
+
+<table class="table">
+    <tr><th>Autor</th><th>Data</th><th>Entrada em vigor</th><th>Tipo</th><th>Conteúdo</th></tr>
+    @foreach (Communication c in Model)
+    {
+        <tr>
+            <td>@c.Author</td>
+            <td>@c.PublishDate</td>
+            <td>@c.EnforcementDate</td>
+            <td>@c.Type</td>
+            <td>@c.Text 
+                @if (c.UrlPrint != null && c.UrlPrint.Length > 0) 
+                {
+                    <a href="@c.UrlPrint"><i class="icon-print"></i></a>
+                }
+                @if (c.UrlMedia != null && c.UrlMedia.Length > 0)
+                {
+                    <a href="@c.UrlMedia"><i class="icon-camera"></i></a>
+                }
+            </td>
+        </tr>
+    }
+</table>
+
+<form action="@Url.Action("List")" class="form-inline" method="post">
+    <label for="date">Data de publicação: </label>
+    <input type="text" class="date" name="date" />
+    <button type="submit" class="btn">Listar</button>
+</form>

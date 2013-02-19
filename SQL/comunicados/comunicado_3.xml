@@ -1,0 +1,7 @@
+﻿<?xml version="1.0"?>
+<myns:comunicado xmlns:myns="si2.isel.pt/2013/TrabFinal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <myns:tipo>legislação</myns:tipo>
+  <myns:autor>Manuel dos Santos</myns:autor>
+  <myns:data>2012-11-20</myns:data>
+  <myns:conteudo>Carissimos, serve o presente para informar que a adesão à greve é obrigatória.</myns:conteudo>
+</myns:comunicado>

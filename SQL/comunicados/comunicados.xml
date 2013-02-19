@@ -1,0 +1,37 @@
+﻿<?xml version="1.0"?>
+<myns:comunicados xmlns:myns="si2.isel.pt/2013/TrabFinal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="si2.isel.pt/2013/TrabFinal file:///C:/Users/w/Desktop/PC/testes/PC_1112i/Teste1Ep/Synchronizers/comunicados.xsd">
+  <myns:oficina codOfic="1">
+    <myns:departamento codDep="1">
+      <myns:comunicado idCom="1">
+        <myns:autor>Joel Santos</myns:autor>
+        <myns:tipo>anúncio</myns:tipo>
+        <myns:data entrada-em-vigor="2013-12-01">2013-02-01</myns:data>
+        <myns:conteudo>Conforme solicitado pela administração, vimos por este meio comunicar um comunicado. Saudações corporativas.</myns:conteudo>
+      </myns:comunicado>
+      <myns:comunicado idCom="2">
+        <myns:tipo>informação</myns:tipo>
+        <myns:autor>Joel Santos</myns:autor>
+        <myns:data>2013-01-02</myns:data>
+        <myns:conteudo>A partir do presente dia deixaremos de contar com o funcionário número 29007, dispensado compulsivamente.</myns:conteudo>
+      </myns:comunicado>
+    </myns:departamento>
+    <myns:departamento codDep="2">
+      <myns:comunicado idCom="1">
+        <myns:tipo>anúncio</myns:tipo>
+        <myns:autor>Maria Silvina</myns:autor>
+        <myns:data>2012-12-20</myns:data>
+        <myns:conteudo>Bom natal para todos os colegas.</myns:conteudo>
+      </myns:comunicado>
+    </myns:departamento>
+  </myns:oficina>
+  <myns:oficina codOfic="2">
+    <myns:departamento codDep="1">
+      <myns:comunicado idCom="1">
+        <myns:tipo>legislação</myns:tipo>
+        <myns:autor>Manuel dos Santos</myns:autor>
+        <myns:data>2012-11-20</myns:data>
+        <myns:conteudo>Carissimos, serve o presente para informar que a adesão à greve é obrigatória.</myns:conteudo>
+      </myns:comunicado>
+    </myns:departamento>
+  </myns:oficina>
+</myns:comunicados>

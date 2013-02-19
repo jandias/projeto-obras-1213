@@ -9,6 +9,7 @@ using obras_1213.Models.View;
 
 namespace obras_1213.Controllers
 {
+    [Authorize]
     public class CommsController : Controller
     {
         //
@@ -66,7 +67,11 @@ namespace obras_1213.Controllers
                 return Index();
             }
         }
-        
 
+        [HttpPost]
+        public ActionResult List(DateTime date)
+        {
+            return View(Communication.List(date));
+        }
     }
 }

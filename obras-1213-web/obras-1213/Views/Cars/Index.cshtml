@@ -8,9 +8,9 @@
 
 <h2>Viaturas</h2>
 
-<div class="well"><table class="table">
+<table class="table">
 <tr><th>Matrícula</th><th>Marca</th><th>Modelo</th><th>Proprietário</th></tr>
 @foreach(Car c in Model) {
     <tr><td>@c.License</td><td>@c.Brand</td><td>@c.Model</td><td>@c.OwnerName</td></tr>
 }
-</table></div>
+</table>

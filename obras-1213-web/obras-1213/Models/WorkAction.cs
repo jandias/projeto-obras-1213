@@ -9,11 +9,10 @@ namespace obras_1213.Models
 {
     public class WorkAction : Action
     {
-        private float timeWorked;
-        private bool completed;
-
         public int WorkID { get; set; }
         public int EmployeeID { get; set; }
+        public float TimeWorked { get; set; }
+        public bool Completed { get; set; }
 
         public WorkAction() { }
         public WorkAction(int actionid, int department, int shop, string description, float timePredicted,
@@ -21,8 +20,8 @@ namespace obras_1213.Models
             : base(actionid, department, shop, description, timePredicted)
         {
             EmployeeID = employee;
-            this.timeWorked = timeWorked;
-            this.completed = isCompleted;
+            TimeWorked = timeWorked;
+            Completed = isCompleted;
             WorkID = work;
         }
 
@@ -57,44 +56,37 @@ namespace obras_1213.Models
             }
         }
 
-        public float TimeWorked 
+        public bool CommitTime()
         {
-            get
+            try
             {
-                return timeWorked;
-            }
-            set
-            {
-                try
+                using (SqlConnection conn = Db.Utils.NewConnection)
                 {
-                    using (SqlConnection conn = Db.Utils.NewConnection)
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(
+                        "UPDATE ObraContem SET horasRealizadas = @horas " +
+                        "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",
+                        conn))
                     {
-                        conn.Open();
-                        using (SqlCommand cmd = new SqlCommand(
-                            "UPDATE ObraContem SET horasRealizadas = @horas " +
-                            "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",
-                            conn))
+                        cmd.Parameters.AddWithValue("@horas", TimeWorked);
+                        cmd.Parameters.AddWithValue("@obra", WorkID);
+                        cmd.Parameters.AddWithValue("@oficina", ShopID);
+                        cmd.Parameters.AddWithValue("@acto", ID);
+                        cmd.Parameters.AddWithValue("@departamento", DepartmentID);
+                        if (cmd.ExecuteNonQuery() > 0)
                         {
-                            cmd.Parameters.AddWithValue("@horas", value);
-                            cmd.Parameters.AddWithValue("@obra", WorkID);
-                            cmd.Parameters.AddWithValue("@oficina", ShopID);
-                            cmd.Parameters.AddWithValue("@acto", ID);
-                            cmd.Parameters.AddWithValue("@departamento", DepartmentID);
-                            if (cmd.ExecuteNonQuery() > 0)
-                            {
-                                timeWorked = value;
-                            }
-                            else
-                            {
-                                throw new ModelException("Não foi possível alterar o estado do acto.");
-                            }
+                            return true;
+                        }
+                        else
+                        {
+                            throw new ModelException("Não foi possível alterar o estado do acto.");
                         }
                     }
                 }
-                catch (SqlException ex)
-                {
-                    throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
-                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
             }
         }
 
@@ -123,44 +115,38 @@ namespace obras_1213.Models
             }
         }
 
-        public bool Completed
+        public bool Complete()
         {
-            get
+            try
             {
-                return completed;
-            }
-            set
-            {
-                try
+                using (SqlConnection conn = Db.Utils.NewConnection)
                 {
-                    using (SqlConnection conn = Db.Utils.NewConnection)
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(
+                        "UPDATE ObraContem SET estaConcluido = @concluido " +
+                        "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",
+                        conn))
                     {
-                        conn.Open();
-                        using (SqlCommand cmd = new SqlCommand(
-                            "UPDATE ObraContem SET estaConcluido = @concluido " +
-                            "WHERE obra=@obra AND oficina=@oficina AND acto=@acto AND departamento=@departamento",
-                            conn))
+                        cmd.Parameters.AddWithValue("@concluido", 1);
+                        cmd.Parameters.AddWithValue("@obra", WorkID);
+                        cmd.Parameters.AddWithValue("@oficina", ShopID);
+                        cmd.Parameters.AddWithValue("@acto", ID);
+                        cmd.Parameters.AddWithValue("@departamento", DepartmentID);
+                        if (cmd.ExecuteNonQuery() > 0)
                         {
-                            cmd.Parameters.AddWithValue("@concluido", value ? 1 : 0);
-                            cmd.Parameters.AddWithValue("@obra", WorkID);
-                            cmd.Parameters.AddWithValue("@oficina", ShopID);
-                            cmd.Parameters.AddWithValue("@acto", ID);
-                            cmd.Parameters.AddWithValue("@departamento", DepartmentID);
-                            if (cmd.ExecuteNonQuery() > 0)
-                            {
-                                completed = value;
-                            }
-                            else
-                            {
-                                throw new ModelException("Não foi possível alterar o estado do acto.");
-                            }
+                            Completed = true;
+                            return true;
+                        }
+                        else
+                        {
+                            throw new ModelException("Não foi possível alterar o estado do acto.");
                         }
                     }
                 }
-                catch (SqlException ex)
-                {
-                    throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
-                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ModelException("Erro na base de dados: " + ex.Message, ex.InnerException);
             }
         }
     }

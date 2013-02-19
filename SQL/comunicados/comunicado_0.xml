@@ -1,0 +1,7 @@
+﻿<?xml version="1.0"?>
+<myns:comunicado xmlns:myns="si2.isel.pt/2013/TrabFinal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <myns:autor>Joel Santos</myns:autor>
+  <myns:tipo>anúncio</myns:tipo>
+  <myns:data entrada-em-vigor="2013-12-01">2013-02-01</myns:data>
+  <myns:conteudo>Conforme solicitado pela administração, vimos por este meio comunicar um comunicado. Saudações corporativas.</myns:conteudo>
+</myns:comunicado>
