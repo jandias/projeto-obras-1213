@@ -4,15 +4,13 @@ WITH XMLNAMESPACES ('si2.isel.pt/2013/TrabFinal' as myns)
 select oficina as [oficina/@id] from Comunicado
 	for xml path,root('myns:comunicados')
 
-  
-     select oficina as [oficina/@id] from Comunicado
-	for xml path
+select oficina as [oficina/@id] from Comunicado for xml path
 
-select conteudoCom from Comunicado
+SELECT conteudoCom from Comunicado
 
 SELECT conteudoCom.query('for $myns:autor in . return {$autor}') as result from Comunicado
 
-WITH XMLNAMESPACES ('si2.isel.pt/2013/TrabFinal' as myns)
+WITH XMLNAMESPACES ('si2.isel.pt/2013/TrabFinal' as myns, 'http://www.w3.org/2001/XMLSchema-instance' as xsi)
 select codOfic as [@codOfic], 
 (select codDep as [@codDep],
   (select idCom as [@idCom], conteudoCom.query('
