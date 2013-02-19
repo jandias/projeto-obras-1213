@@ -3,6 +3,13 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('h3+h3').remove();
+        $('h3:last-child').remove();
+    });
+</script>
+
 <h2>Comunicados</h2>
 
 @MvcHtmlString.Create(ViewBag.CommsHtml)
